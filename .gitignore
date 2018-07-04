@@ -1,4 +1,6 @@
 .project
-/bin
+/bin/
 .classpath
-
+.DS_Store
+.idea
+out/

@@ -121,126 +121,126 @@ public class Hand {
 		return this.cards.size() == 2;
 	}
 
-	public String getBasicStrategyDecisionForPair(Card dealerUpCard) {
+	public Decision getBasicStrategyDecisionForPair(Card dealerUpCard) {
 		Integer dealerUpCardValue = dealerUpCard.getRank().getValue();
 
 		Rank rank = this.cards.get(0).getRank();
 		if (rank.equals(Rank.ACE) || rank.equals(Rank.EIGHT)) {
 			// Always split Aces and 8s
-			return "Split";
+			return Decision.SPLIT;
 		} else if (rank.equals(Rank.TWO) || rank.equals(Rank.THREE)) {
 			// Split 2s and 3s against up to a 7
 			if (dealerUpCardValue < 8) {
-				return "Split";
+				return Decision.SPLIT;
 			}
-			return "Hit";
+			return Decision.HIT;
 		} else if (rank.equals(Rank.FOUR)) {
 			// Only split 4s against a 5 or 6
 			if (dealerUpCardValue == 5 || dealerUpCardValue == 6) {
-				return "Split";
+				return Decision.SPLIT;
 			} else {
-				return "Hit";
+				return Decision.HIT;
 			}
 		} else if (rank.equals(Rank.SIX)) {
 			// Split 6s against up to a 6
 			if (dealerUpCardValue < 7) {
-				return "Split";
+				return Decision.SPLIT;
 			} else {
-				return "Hit";
+				return Decision.HIT;
 			}
 		} else if (rank.equals(Rank.SEVEN)) {
 			// Split 7s against up to a 7
 			if (dealerUpCardValue < 8) {
-				return "Split";
+				return Decision.SPLIT;
 			} else {
-				return "Hit";
+				return Decision.HIT;
 			}
 		} else {
 			// Split 9s against all but a 7, 10 or Ace
 			if (dealerUpCardValue == 7 || dealerUpCardValue == 10 || dealerUpCardValue == 11) {
-				return "Stand";
+				return Decision.STAND;
 			} else {
-				return "Split";
+				return Decision.SPLIT;
 			}
 		}
 	}
 
-	public String getBasicStrategyDecisionForSoftHand(Card dealerUpCard) {
+	public Decision getBasicStrategyDecisionForSoftHand(Card dealerUpCard) {
 		Integer handValue = this.calculateValue();
 		Integer dealerUpCardValue = dealerUpCard.getRank().getValue();
 		if (handValue > 18) {
-			return "Stand";
+			return Decision.STAND;
 		} else if (handValue == 18) {
 			if (dealerUpCardValue == 2 || dealerUpCardValue == 7 || dealerUpCardValue == 8) {
-				return "Stand";
+				return Decision.STAND;
 			} else if (dealerUpCardValue > 2 && dealerUpCardValue < 7) {
 				if (this.isTwoCards())
-					return "Double";
+					return Decision.DOUBLE;
 				else
-					return "Hit";
+					return Decision.HIT;
 			} else {
-				return "Hit";
+				return Decision.HIT;
 			}
 		} else if (handValue == 17) {
 			if (dealerUpCardValue > 2 && dealerUpCardValue < 7) {
 				if (this.isTwoCards())
-					return "Double";
+					return Decision.DOUBLE;
 				else
-					return "Hit";
+					return Decision.HIT;
 			} else {
-				return "Hit";
+				return Decision.HIT;
 			}
 		} else if (handValue == 16 || handValue == 15) {
 			if (dealerUpCardValue > 3 && dealerUpCardValue < 7) {
 				if (this.isTwoCards())
-					return "Double";
+					return Decision.DOUBLE;
 				else
-					return "Hit";
+					return Decision.HIT;
 			} else {
-				return "Hit";
+				return Decision.HIT;
 			}
 		} else if (handValue == 14 || handValue == 13) {
 			if (dealerUpCardValue > 4 && dealerUpCardValue < 7) {
 				if (this.isTwoCards())
-					return "Double";
+					return Decision.DOUBLE;
 				else
-					return "Hit";
+					return Decision.HIT;
 			} else {
-				return "Hit";
+				return Decision.HIT;
 			}
 		} else {
-			return "Hit";
+			return Decision.HIT;
 		}
 	}
 
-	public String getBasicStrategyDecisionForHardHand(Card dealerUpCard) {
+	public Decision getBasicStrategyDecisionForHardHand(Card dealerUpCard) {
 		Integer dealerUpCardValue = dealerUpCard.getRank().getValue();
 		if (dealerUpCardValue < 7) {
 			// Weak dealer card
 			if (this.calculateValue() < 9) {
-				return "Hit";
+				return Decision.HIT;
 			} else if (this.calculateValue() == 9) {
 				if (dealerUpCardValue == 2) {
-					return "Hit";
+					return Decision.HIT;
 				} else {
 					if (this.isTwoCards())
-						return "Double";
+						return Decision.DOUBLE;
 					else
-						return "Hit";
+						return Decision.HIT;
 				}
 			} else if (this.calculateValue() == 10 || this.calculateValue() == 11) {
 				if (this.isTwoCards())
-					return "Double";
+					return Decision.DOUBLE;
 				else
-					return "Hit";
+					return Decision.HIT;
 			} else if (this.calculateValue() == 12) {
 				if (dealerUpCardValue == 2 || dealerUpCardValue == 3) {
-					return "Hit";
+					return Decision.HIT;
 				} else {
-					return "Stand";
+					return Decision.STAND;
 				}
 			} else {
-				return "Stand";
+				return Decision.STAND;
 			}
 		} else {
 			// Strong dealer card
@@ -248,24 +248,24 @@ public class Hand {
 				if (this.calculateValue() == 10 || this.calculateValue() == 11) {
 					if (dealerUpCardValue < this.calculateValue()) {
 						if (this.isTwoCards())
-							return "Double";
+							return Decision.DOUBLE;
 						else
-							return "Hit";
+							return Decision.HIT;
 					} else {
-						return "Hit";
+						return Decision.HIT;
 					}
 				} else {
-					return "Hit";
+					return Decision.HIT;
 				}
 			} else {
-				return "Stand";
+				return Decision.STAND;
 			}
 		}
 	}
 
 	// Returns basic strategy decision for this hand against the given
 	// dealerUpCard.
-	public String getBasicStrategyDecision(Card dealerUpCard) {
+	public Decision getBasicStrategyDecision(Card dealerUpCard) {
 		if (this.isPair() && this.calculateValue() != 10 && this.calculateValue() != 20) {
 			return getBasicStrategyDecisionForPair(dealerUpCard);
 		} else {

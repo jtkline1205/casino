@@ -18,13 +18,13 @@ public class SeriesPanel extends JPanel {
 	public SeriesPanel() {
 		handPanels = new ArrayList<HandPanel>();
 		setLayout(new GridLayout(1, 1));
-		setBackground(FELT_COLOR);
+//		setBackground(FELT_COLOR);
 	}
 
 	public SeriesPanel(HandPanel handPanel) {
 		handPanels = new ArrayList<HandPanel>();
 		setLayout(new GridLayout(1, 1));
-		setBackground(FELT_COLOR);
+//		setBackground(FELT_COLOR);
 		add(handPanel);
 		handPanels.add(handPanel);
 	}

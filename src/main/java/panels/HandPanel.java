@@ -13,12 +13,12 @@ public class HandPanel extends JPanel {
 
 	public HandPanel() {
 		setLayout(new GridLayout(1, 1));
-		setBackground(FELT_COLOR);
+//		setBackground(FELT_COLOR);
 	}
 
 	public HandPanel(CardPanel cardPanel1, CardPanel cardPanel2) {
 		setLayout(new GridLayout(1, 1));
-		setBackground(FELT_COLOR);
+//		setBackground(FELT_COLOR);
 		add(cardPanel1);
 		add(cardPanel2);
 	}

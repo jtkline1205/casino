@@ -20,7 +20,7 @@ public class CardPanel extends JPanel {
 	public CardPanel() {
 		try {
 			image = ImageIO.read(new File("src/main/resources/card_back.png"));
-			this.setBackground(new Color(0, 100, 0));
+//			this.setBackground(new Color(0, 100, 0));
 		} catch (IOException ex) {
 			System.out.println("Could not find file.");
 		}
@@ -29,7 +29,7 @@ public class CardPanel extends JPanel {
 	public CardPanel(Card card) {
 		try {
 			image = ImageIO.read(new File("src/main/resources/" + card.getResourceName() + ".png"));
-			this.setBackground(new Color(0, 100, 0));
+//			this.setBackground(new Color(0, 100, 0));
 		} catch (IOException ex) {
 			System.out.println("Could not find file.");
 		}

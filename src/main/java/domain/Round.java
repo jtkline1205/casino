@@ -123,33 +123,62 @@ public class Round {
 		return winnings;
 	}
 
+	private Boolean runPlayerHitsOn16AndUnder(Hand playerHand, HandPanel playerHandPanel) throws InterruptedException {
+		// ~40.93% win rate
+		while (playerShouldHit16OrUnder(playerHand)) {
+			drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
+			if (playerHand.isBust()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private Boolean runPlayerHitsOn16AndUnderUnlessWeakDealer(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
+			throws InterruptedException {
+		// ~43.25% win rate
+		 while (playerShouldHit16OrUnderUnlessWeakDealer(playerHand, dealerUpCard)) {
+			 drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
+			 if (playerHand.isBust()) {
+			 	return false;
+			 }
+		 }
+		 return true;
+	}
+
+	private boolean playerShouldHit16OrUnder(Hand playerHand) {
+		return playerHand.calculateValue() < 17;
+	}
+
+	private boolean playerShouldHit16OrUnderUnlessWeakDealer(Hand playerHand, Card dealerUpCard) {
+		if (dealerUpCard.getRank().getValue() < 7) {
+			if (playerHand.calculateValue() < 12) {
+				return true;
+			} else if (playerHand.calculateValue() == 12) {
+				return (dealerUpCard.getRank().getValue() == 2 || dealerUpCard.getRank().getValue() == 3);
+			}
+			return false;
+		} else {
+			return (playerHand.calculateValue() < 17);
+		}
+	}
+
+	private void drawCardAndUpdatePlayerHandPanel(Hand playerHand, HandPanel playerHandPanel) throws InterruptedException {
+		log("Drawing card for Player.");
+		Card newCard = shoe.drawCard();
+		playerHand.addCard(newCard);
+		playerHandPanel.add(new CardPanel(newCard));
+		parent.packAndWait();
+	}
+
 	private Boolean runPlayerSeries(Series playerSeries, Card dealerUpCard, SeriesPanel playerSeriesPanel)
 			throws InterruptedException {
 		Hand playerFirstHand = playerSeries.getHands().get(0);
 		HandPanel playerFirstHandPanel = playerSeriesPanel.getHandPanels().get(0);
 
-		// Player only hits on hands less than 17.
-		// ~40.93% win rate
-		// while (playerHand.calculateValue() < 17) {
-		// log("Drawing card for Player.");
-		// playerHand.addCard(shoe.drawCard());
-		// if (playerHand.calculateValue() > 21) {
-		// return true;
-		// }
-		// }
-		// return false;
+		// return runPlayerHitsOn16AndUnder(playerFirstHand, playerFirstHandPanel);
 
-		// playerShouldHit() Strategy:
-		// ~43.25% win rate
-		// while (playerShouldHit(playerFirstHand, dealerUpCard)) {
-		// log("Drawing card for Player.");
-		// playerFirstHand.addCard(shoe.drawCard());
-		// if (playerFirstHand.calculateValue() > 21) {
-		// return false;
-		// }
-		// repaintBlackjackPanel();
-		// }
-		// return true;
+		// return runPlayerHitsOn16AndUnderUnlessWeakDealer(playerFirstHand, playerFirstHandPanel, dealerUpCard);
 
 		// Basic Strategy Iteration 1
 		// ~42.30% win rate
@@ -159,12 +188,14 @@ public class Round {
 
 	private Boolean runPlayerHand(Hand playerHand, HandPanel playerHandPanel, Series playerSeries,
 			SeriesPanel playerSeriesPanel, Card dealerUpCard) throws InterruptedException {
-		String decision = playerHand.getBasicStrategyDecision(dealerUpCard);
-		if (decision.equals("Stand")) {
-			log(playerHand + " decision: Stand");
+		Decision decision = blackjackPanel.getLatestDecision();
+		if (decision == null) {
+			decision = playerHand.getBasicStrategyDecision(dealerUpCard);
+		}
+		log(playerHand + " decision: " + decision.getName());
+		if (decision == Decision.STAND) {
 			return true;
-		} else if (decision.equals("Double")) {
-			log(playerHand + " decision: Double");
+		} else if (decision == Decision.DOUBLE) {
 			blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet() + playerHand.getBet());
 			playerHand.doubleBet();
 			Card card = shoe.drawCard();
@@ -173,9 +204,7 @@ public class Round {
 			blackjackPanel.updateBankrollPanel(playerBankroll - playerSeries.getTotalBet());
 			parent.packAndWait();
 			return true;
-		} else if (decision.equals("Split")) {
-			log(playerHand + " decision: Split");
-
+		} else if (decision == Decision.SPLIT) {
 			// Remove spltting Hand from Series
 			playerSeries.getHands().remove(playerHand);
 
@@ -238,10 +267,9 @@ public class Round {
 			}
 
 			return hand1NeedsResolution || hand2NeedsResolution;
-
 		} else {
-			while (decision.equals("Hit")) {
-				log(playerHand + " decision: Hit");
+			while (decision == Decision.HIT) {
+				log(playerHand + " decision: " + decision.getName());
 				Card card = shoe.drawCard();
 				playerHand.addCard(card);
 				playerHandPanel.add(new CardPanel(card));
@@ -263,20 +291,6 @@ public class Round {
 			parent.packAndWait();
 		}
 		log("Dealer ended with this hand: " + dealerHand);
-	}
-
-	@SuppressWarnings("unused")
-	private boolean playerShouldHit(Hand playerHand, Card dealerUpCard) {
-		if (dealerUpCard.getRank().getValue() < 7) {
-			if (playerHand.calculateValue() < 12) {
-				return true;
-			} else if (playerHand.calculateValue() == 12) {
-				return (dealerUpCard.getRank().getValue() == 2 || dealerUpCard.getRank().getValue() == 3);
-			}
-			return false;
-		} else {
-			return (playerHand.calculateValue() < 17);
-		}
 	}
 
 	private void log(String string) {

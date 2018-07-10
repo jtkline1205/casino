@@ -20,7 +20,7 @@ public class ChipPanel extends JPanel {
 	public ChipPanel() {
 		try {
 			image = ImageIO.read(new File("src/main/resources/whitechip.png"));
-			this.setBackground(new Color(0, 100, 0));
+//			this.setBackground(new Color(0, 100, 0));
 		} catch (IOException ex) {
 			System.out.println("Could not find file.");
 		}
@@ -29,7 +29,7 @@ public class ChipPanel extends JPanel {
 	public ChipPanel(Chip chip) {
 		try {
 			image = ImageIO.read(new File("src/main/resources/" + chip.getResourceName() + ".png"));
-			this.setBackground(new Color(0, 100, 0));
+//			this.setBackground(new Color(0, 100, 0));
 		} catch (IOException ex) {
 			System.out.println("Could not find file with resourceName: " + chip.getResourceName());
 		}

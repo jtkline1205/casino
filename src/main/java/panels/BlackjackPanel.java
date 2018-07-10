@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import domain.Decision;
 import domain.Stack;
 
 public class BlackjackPanel extends JPanel implements ActionListener {
@@ -37,6 +38,12 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	private StackPanel playerBetPanel;
 
 	private JButton continueButton;
+	private JButton hitButton;
+	private JButton standButton;
+	private JButton splitButton;
+	private JButton doubleButton;
+
+	private Decision latestDecision;
 
 	private boolean continueGame = false;
 
@@ -45,13 +52,33 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		setupTitleLabel1();
 		setupTitleLabel2();
 		continueButton.addActionListener(this);
+		hitButton.addActionListener(this);
+		standButton.addActionListener(this);
+		splitButton.addActionListener(this);
+		doubleButton.addActionListener(this);
 		setLayouts();
 		setPreferredSizes();
 		addComponents();
 	}
 
+	public Decision getLatestDecision() {
+		return this.latestDecision;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent ae) {
+		String buttonText = ((JButton)ae.getSource()).getText();
+		if (buttonText.equals("Continue")) {
+			latestDecision = null;
+		} else if (buttonText.equals("Hit")) {
+			latestDecision = Decision.HIT;
+		} else if (buttonText.equals("Stand")) {
+			latestDecision = Decision.STAND;
+		} else if (buttonText.equals("Split")) {
+			latestDecision = Decision.SPLIT;
+		} else if (buttonText.equals("Double")) {
+			latestDecision = Decision.DOUBLE;
+		}
 		continueGame = true;
 	}
 
@@ -85,18 +112,20 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 
 	public void updateBankrollPanel(Double bankroll) {
 		statsPanel.remove(bankrollPanel);
-		statsPanel.remove(playerBetPanel);
 		Stack newStack = new Stack(bankroll);
-		this.bankrollPanel = new StackPanel(newStack);
+		bankrollPanel = new StackPanel(newStack, new Color(0, 100, 0));
 		statsPanel.add(bankrollPanel);
-		statsPanel.add(playerBetPanel);
 	}
 
 	public void updatePlayerBetPanel(Double playerBet) {
-		statsPanel.remove(playerBetPanel);
-		Stack newStack = new Stack(playerBet);
-		this.playerBetPanel = new StackPanel(newStack);
-		statsPanel.add(playerBetPanel);
+		resultPanel.remove(resultStackPanel);
+		resultPanel.remove(playerBetPanel);
+
+		playerBetPanel = new StackPanel(new Stack(playerBet), new Color(182, 182, 29));
+		playerBetPanel.setBackground(new Color(182, 182, 29));
+
+		resultPanel.add(resultStackPanel);
+		resultPanel.add(playerBetPanel);
 	}
 
 	public void updateResultPanel(Double doubleValue) {
@@ -111,9 +140,14 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 			this.resultLabel.setText("PUSH");
 			resultStack = new Stack(doubleValue);
 		}
-		this.resultPanel.remove(this.resultStackPanel);
-		this.resultStackPanel = new StackPanel(resultStack);
-		this.resultPanel.add(this.resultStackPanel);
+		resultPanel.remove(resultStackPanel);
+		resultPanel.remove(playerBetPanel);
+
+		resultStackPanel = new StackPanel(resultStack, new Color(177, 82, 182));
+		resultStackPanel.setBackground(new Color(177, 82, 182));
+
+		resultPanel.add(resultStackPanel);
+		resultPanel.add(playerBetPanel);
 	}
 
 	private void initializeComponents() {
@@ -132,11 +166,16 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		bankrollPanel = new StackPanel();
 		playerBetPanel = new StackPanel();
 		continueButton = new JButton("Continue");
+		hitButton = new JButton("Hit");
+		standButton = new JButton("Stand");
+		splitButton = new JButton("Split");
+		doubleButton = new JButton("Double");
 
-		resultPanel.setBackground(new Color(0, 100, 0));
-		resultStackPanel.setBackground(new Color(0, 100, 0));
-		middlePanel.setBackground(new Color(100, 0, 0));
-		statsPanel.setBackground(new Color(0, 100, 0));
+//		resultPanel.setBackground(new Color(0, 100, 0));
+//		resultStackPanel.setBackground(new Color(182, 182, 29));
+//		middlePanel.setBackground(new Color(100, 0, 0));
+//		statsPanel.setBackground(new Color(0, 100, 0));
+//		playerBetPanel.setBackground(new Color(182, 182, 29));
 
 	}
 
@@ -156,37 +195,50 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 
 	private void setLayouts() {
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		topPanel.setLayout(new GridLayout(1, 2));
-		dealerPanel.setLayout(new GridLayout(1, 1));
-		shoePanel.setLayout(new GridLayout(1, 2));
-		middlePanel.setLayout(new GridLayout(2, 1));
-		resultPanel.setLayout(new GridLayout(1, 2));
-		bottomPanel.setLayout(new GridLayout(1, 2));
-		playerPanel.setLayout(new GridLayout(1, 1));
-		statsPanel.setLayout(new GridLayout(1, 3));
+
+		topPanel.setLayout(new GridLayout(1, 0));
+		dealerPanel.setLayout(new GridLayout(1, 0));
+		shoePanel.setLayout(new GridLayout(1, 0));
+
+		middlePanel.setLayout(new GridLayout(3, 0));
+		resultPanel.setLayout(new GridLayout(3, 0));
+
+		bottomPanel.setLayout(new GridLayout(0, 2));
+		playerPanel.setLayout(new GridLayout(1, 0));
+		statsPanel.setLayout(new GridLayout(0, 1));
 	}
 
 	private void setPreferredSizes() {
-		this.setPreferredSize(new Dimension(800, 600));
-		topPanel.setPreferredSize(new Dimension(800, 275));
-		middlePanel.setPreferredSize(new Dimension(800, 50));
-		bottomPanel.setPreferredSize(new Dimension(800, 275));
+		this.setPreferredSize(new Dimension(800, 700));
+		topPanel.setPreferredSize(new Dimension(800, 100));
+		middlePanel.setPreferredSize(new Dimension(800, 300));
+		bottomPanel.setPreferredSize(new Dimension(800, 300));
 	}
 
 	private void addComponents() {
-		shoePanel.add(new CardPanel());
-		resultPanel.add(resultLabel);
-		resultPanel.add(resultStackPanel);
-		shoePanel.add(resultPanel);
-		statsPanel.add(continueButton);
-		statsPanel.add(bankrollPanel);
-		statsPanel.add(playerBetPanel);
 		topPanel.add(dealerPanel);
+		shoePanel.add(new CardPanel());
 		topPanel.add(shoePanel);
+
 		middlePanel.add(titleLabel1);
 		middlePanel.add(titleLabel2);
+
+		resultPanel.add(resultLabel);
+		resultPanel.add(resultStackPanel);
+		resultPanel.add(playerBetPanel);
+		middlePanel.add(resultPanel);
+
 		bottomPanel.add(playerPanel);
+
+		statsPanel.add(bankrollPanel);
+		statsPanel.add(continueButton);
+		statsPanel.add(hitButton);
+		statsPanel.add(standButton);
+		statsPanel.add(splitButton);
+		statsPanel.add(doubleButton);
+
 		bottomPanel.add(statsPanel);
+
 		this.add(topPanel);
 		this.add(middlePanel);
 		this.add(bottomPanel);

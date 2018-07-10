@@ -5,19 +5,12 @@ import java.awt.Color;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import domain.Card;
-import domain.Hand;
-import domain.Round;
-import domain.Series;
-import domain.Shoe;
+import domain.*;
 import panels.BlackjackPanel;
 import panels.CardPanel;
 import panels.HandPanel;
 import panels.SeriesPanel;
 
-/**
- * A game of Blackjack.
- */
 public class BlackjackGame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -26,7 +19,7 @@ public class BlackjackGame extends JFrame {
 	private static final boolean BUTTON_CONTROLLED = true;
 
 	private static final int DEAL_SPEED = 10;
-	private static final int DECKS_IN_SHOE = 4;
+	private static final int DECKS_IN_SHOE = 1;
 	private static final int SHOE_CARD_LIMIT = 10;
 	private static final int PLAYER_BANKROLL_LIMIT = 10;
 	private static final int TOTAL_ROUNDS = 20;
@@ -37,8 +30,8 @@ public class BlackjackGame extends JFrame {
 
 	private static final Color FELT_COLOR = new Color(0, 100, 0);
 
-	private Double playerBet = 150.00;
-	private Double playerBankroll = 5000.00;
+	private Double playerBet = 10.00;
+	private Double playerBankroll = 200.00;
 
 	private Shoe shoe;
 
@@ -138,7 +131,7 @@ public class BlackjackGame extends JFrame {
 		blackjackPanel = new BlackjackPanel();
 		blackjackPanel.updateBankrollPanel(playerBankroll - playerBet);
 		add(blackjackPanel);
-		setBackground(FELT_COLOR);
+//		setBackground(FELT_COLOR);
 	}
 
 	private void log(String string) {

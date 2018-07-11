@@ -24,8 +24,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	private JPanel dealerPanel;
 	private JPanel shoePanel;
 	private JPanel resultPanel;
-	private JLabel resultLabel;
-	private StackPanel resultStackPanel;
+	private StackPanel houseBankPanel;
 
 	private JPanel middlePanel;
 	private JLabel titleLabel1;
@@ -34,8 +33,10 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	private JPanel bottomPanel;
 	private PlayerPanel playerPanel;
 	private JPanel statsPanel;
-	private StackPanel bankrollPanel;
+	private StackPanel playerBankPanel;
 	private StackPanel playerBetPanel;
+	private StackPanel playerWinningsPanel;
+	private JPanel playerActiveChipsPanel;
 
 	private JButton continueButton;
 	private JButton hitButton;
@@ -46,6 +47,12 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	private Decision latestDecision;
 
 	private boolean continueGame = false;
+
+	private final Color FELT_GREEN = new Color(0, 100, 0);
+	private final Color GOLD = new Color(182, 182, 29);
+	private final Color PURPLE = new Color(177, 82, 182);
+	private final Color BLUE = new Color(117, 166, 255);
+	private final Color SCARLET = new Color(211, 20, 43);
 
 	public BlackjackPanel() {
 		initializeComponents();
@@ -82,24 +89,12 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		continueGame = true;
 	}
 
-	public JPanel getTopPanel() {
-		return topPanel;
-	}
-
-	public JPanel getBottomPanel() {
-		return bottomPanel;
-	}
-
 	public JPanel getDealerPanel() {
 		return dealerPanel;
 	}
 
 	public PlayerPanel getPlayerPanel() {
 		return playerPanel;
-	}
-
-	public JPanel getStatsPanel() {
-		return statsPanel;
 	}
 
 	public boolean getContinueGame() {
@@ -110,44 +105,45 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		this.continueGame = continueGame;
 	}
 
-	public void updateBankrollPanel(Double bankroll) {
-		statsPanel.remove(bankrollPanel);
+	public void updatePlayerBankPanel(Double bankroll) {
+		statsPanel.remove(playerBankPanel);
 		Stack newStack = new Stack(bankroll);
-		bankrollPanel = new StackPanel(newStack, new Color(0, 100, 0));
-		statsPanel.add(bankrollPanel);
+		playerBankPanel = new StackPanel(newStack, FELT_GREEN);
+		statsPanel.add(playerBankPanel);
 	}
 
 	public void updatePlayerBetPanel(Double playerBet) {
-		resultPanel.remove(resultStackPanel);
-		resultPanel.remove(playerBetPanel);
+		playerActiveChipsPanel.remove(playerBetPanel);
+		playerActiveChipsPanel.remove(playerWinningsPanel);
 
-		playerBetPanel = new StackPanel(new Stack(playerBet), new Color(182, 182, 29));
-		playerBetPanel.setBackground(new Color(182, 182, 29));
+		playerBetPanel = new StackPanel(new Stack(playerBet), GOLD);
+		playerBetPanel.setBackground(GOLD);
 
-		resultPanel.add(resultStackPanel);
-		resultPanel.add(playerBetPanel);
+		playerActiveChipsPanel.add(playerBetPanel);
+		playerActiveChipsPanel.add(playerWinningsPanel);
 	}
 
 	public void updateResultPanel(Double doubleValue) {
 		Stack resultStack = null;
+		resultPanel.remove(houseBankPanel);
+		resultPanel.remove(playerActiveChipsPanel);
+		playerActiveChipsPanel.remove(playerBetPanel);
+		playerActiveChipsPanel.remove(playerWinningsPanel);
+
 		if (doubleValue < 0) {
-			this.resultLabel.setText("LOST");
 			resultStack = new Stack(-1 * doubleValue);
+			houseBankPanel = new StackPanel(resultStack, PURPLE);
+			houseBankPanel.setBackground(PURPLE);
 		} else if (doubleValue > 0) {
-			this.resultLabel.setText("WON");
 			resultStack = new Stack(doubleValue);
-		} else if (doubleValue == 0) {
-			this.resultLabel.setText("PUSH");
-			resultStack = new Stack(doubleValue);
+			playerWinningsPanel = new StackPanel(resultStack, BLUE);
+			playerWinningsPanel.setBackground(BLUE);
 		}
-		resultPanel.remove(resultStackPanel);
-		resultPanel.remove(playerBetPanel);
 
-		resultStackPanel = new StackPanel(resultStack, new Color(177, 82, 182));
-		resultStackPanel.setBackground(new Color(177, 82, 182));
-
-		resultPanel.add(resultStackPanel);
-		resultPanel.add(playerBetPanel);
+		resultPanel.add(houseBankPanel);
+		playerActiveChipsPanel.add(playerBetPanel);
+		playerActiveChipsPanel.add(playerWinningsPanel);
+		resultPanel.add(playerActiveChipsPanel);
 	}
 
 	private void initializeComponents() {
@@ -155,28 +151,23 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		dealerPanel = new JPanel();
 		shoePanel = new JPanel();
 		resultPanel = new JPanel();
-		resultLabel = new JLabel();
-		resultStackPanel = new StackPanel();
+		houseBankPanel = new StackPanel(PURPLE);
 		middlePanel = new JPanel();
+		middlePanel.setBackground(SCARLET);
 		titleLabel1 = new JLabel();
 		titleLabel2 = new JLabel();
 		bottomPanel = new JPanel();
 		playerPanel = new PlayerPanel();
 		statsPanel = new JPanel();
-		bankrollPanel = new StackPanel();
-		playerBetPanel = new StackPanel();
+		playerBankPanel = new StackPanel(FELT_GREEN);
+		playerBetPanel = new StackPanel(GOLD);
+		playerWinningsPanel = new StackPanel(BLUE);
+		playerActiveChipsPanel = new JPanel();
 		continueButton = new JButton("Continue");
 		hitButton = new JButton("Hit");
 		standButton = new JButton("Stand");
 		splitButton = new JButton("Split");
 		doubleButton = new JButton("Double");
-
-//		resultPanel.setBackground(new Color(0, 100, 0));
-//		resultStackPanel.setBackground(new Color(182, 182, 29));
-//		middlePanel.setBackground(new Color(100, 0, 0));
-//		statsPanel.setBackground(new Color(0, 100, 0));
-//		playerBetPanel.setBackground(new Color(182, 182, 29));
-
 	}
 
 	private void setupTitleLabel1() {
@@ -201,7 +192,8 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		shoePanel.setLayout(new GridLayout(1, 0));
 
 		middlePanel.setLayout(new GridLayout(3, 0));
-		resultPanel.setLayout(new GridLayout(3, 0));
+		resultPanel.setLayout(new GridLayout(2, 0));
+		playerActiveChipsPanel.setLayout(new GridLayout(0, 2));
 
 		bottomPanel.setLayout(new GridLayout(0, 2));
 		playerPanel.setLayout(new GridLayout(1, 0));
@@ -209,9 +201,9 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	}
 
 	private void setPreferredSizes() {
-		this.setPreferredSize(new Dimension(800, 700));
+		this.setPreferredSize(new Dimension(800, 600));
 		topPanel.setPreferredSize(new Dimension(800, 100));
-		middlePanel.setPreferredSize(new Dimension(800, 300));
+		middlePanel.setPreferredSize(new Dimension(800, 200));
 		bottomPanel.setPreferredSize(new Dimension(800, 300));
 	}
 
@@ -223,14 +215,15 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		middlePanel.add(titleLabel1);
 		middlePanel.add(titleLabel2);
 
-		resultPanel.add(resultLabel);
-		resultPanel.add(resultStackPanel);
-		resultPanel.add(playerBetPanel);
+		resultPanel.add(houseBankPanel);
+		playerActiveChipsPanel.add(playerBetPanel);
+		playerActiveChipsPanel.add(playerWinningsPanel);
+		resultPanel.add(playerActiveChipsPanel);
 		middlePanel.add(resultPanel);
 
 		bottomPanel.add(playerPanel);
 
-		statsPanel.add(bankrollPanel);
+		statsPanel.add(playerBankPanel);
 		statsPanel.add(continueButton);
 		statsPanel.add(hitButton);
 		statsPanel.add(standButton);

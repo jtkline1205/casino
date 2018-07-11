@@ -129,7 +129,7 @@ public class BlackjackGame extends JFrame {
 	private void initializeNewBlackjackPanel() {
 		getContentPane().removeAll();
 		blackjackPanel = new BlackjackPanel();
-		blackjackPanel.updateBankrollPanel(playerBankroll - playerBet);
+		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerBet);
 		add(blackjackPanel);
 //		setBackground(FELT_COLOR);
 	}

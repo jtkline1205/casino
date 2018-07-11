@@ -201,7 +201,7 @@ public class Round {
 			Card card = shoe.drawCard();
 			playerHand.addCard(card);
 			playerHandPanel.add(new CardPanel(card));
-			blackjackPanel.updateBankrollPanel(playerBankroll - playerSeries.getTotalBet());
+			blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
 			parent.packAndWait();
 			return true;
 		} else if (decision == Decision.SPLIT) {
@@ -238,7 +238,7 @@ public class Round {
 			playerSeriesPanel.addHandPanel(newHandPanel2);
 
 			blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet());
-			blackjackPanel.updateBankrollPanel(playerBankroll - playerSeries.getTotalBet());
+			blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
 
 			// Repaint
 			parent.packAndWait();

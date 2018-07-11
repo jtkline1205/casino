@@ -16,13 +16,12 @@ public class StackPanel extends JPanel {
 
 	private BufferedImage image;
 
-	public StackPanel() {
-//		this.setBackground(new Color(0, 100, 0));
+	public StackPanel(Color backgroundColor) {
+		this.setBackground(backgroundColor);
 	}
 
 	public StackPanel(Stack stack, Color backgroundColor) {
 		this.setLayout(new GridLayout(1, 0));
-//		this.setBackground(new Color(0, 100, 0));
 		for (Chip chip : stack.getChips()) {
 			ChipPanel chipPanel = new ChipPanel(chip);
 			chipPanel.setBackground(backgroundColor);

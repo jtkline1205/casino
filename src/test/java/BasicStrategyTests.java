@@ -1,225 +1,209 @@
-import domain.Card;
-import domain.Decision;
-import domain.Hand;
-import domain.Rank;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import domain.Card;
+import domain.Decision;
+import domain.Hand;
+import domain.Rank;
 
 public class BasicStrategyTests {
-    @Test
-    public void testGetBasicStrategyDecisionForHardHands() {
-        List<Hand> standHands1 = new ArrayList<Hand>();
-        standHands1.add(new Hand(new Card(Rank.SEVEN), new Card(Rank.JACK)));
-        standHands1.add(new Hand(new Card(Rank.EIGHT), new Card(Rank.JACK)));
-        standHands1.add(new Hand(new Card(Rank.NINE), new Card(Rank.JACK)));
-        standHands1.add(new Hand(new Card(Rank.JACK), new Card(Rank.JACK)));
 
-        for (Hand playerHand : standHands1) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.TWO));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.THREE));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FOUR));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FIVE));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SIX));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SEVEN));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.EIGHT));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.NINE));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.TEN));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.ACE));
-            assertEquals(Decision.STAND, decision);
-        }
+	private Card[] weakDealerCards = new Card[] { new Card(Rank.TWO), new Card(Rank.THREE), new Card(Rank.FOUR),
+			new Card(Rank.FIVE), new Card(Rank.SIX) };
 
-        List<Hand> standHands2 = new ArrayList<Hand>();
-        standHands2.add(new Hand(new Card(Rank.THREE), new Card(Rank.JACK)));
-        standHands2.add(new Hand(new Card(Rank.FOUR), new Card(Rank.JACK)));
-        standHands2.add(new Hand(new Card(Rank.FIVE), new Card(Rank.JACK)));
-        standHands2.add(new Hand(new Card(Rank.SIX), new Card(Rank.JACK)));
+	private Card[] strongDealerCards = new Card[] { new Card(Rank.SEVEN), new Card(Rank.EIGHT), new Card(Rank.NINE),
+			new Card(Rank.TEN), new Card(Rank.ACE) };
 
-        for (Hand playerHand : standHands2) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.TWO));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.THREE));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FOUR));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FIVE));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SIX));
-            assertEquals(Decision.STAND, decision);
-        }
+	@Test
+	public void testStandOnStrongHandsVersusAllDealerCards() {
+		List<Hand> strongPlayerHands = new ArrayList<Hand>();
+		strongPlayerHands.add(new Hand(new Card(Rank.SEVEN), new Card(Rank.JACK)));
+		strongPlayerHands.add(new Hand(new Card(Rank.EIGHT), new Card(Rank.JACK)));
+		strongPlayerHands.add(new Hand(new Card(Rank.NINE), new Card(Rank.JACK)));
+		strongPlayerHands.add(new Hand(new Card(Rank.JACK), new Card(Rank.JACK)));
 
-        List<Hand> standHands3 = new ArrayList<Hand>();
-        standHands3.add(new Hand(new Card(Rank.TWO), new Card(Rank.JACK)));
+		for (Hand strongPlayerHand : strongPlayerHands) {
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals(Decision.STAND, strongPlayerHand.getBasicStrategyDecision(weakDealerCard));
+			}
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.STAND, strongPlayerHand.getBasicStrategyDecision(strongDealerCard));
+			}
+		}
+	}
 
-        for (Hand playerHand : standHands3) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.FOUR));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FIVE));
-            assertEquals(Decision.STAND, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SIX));
-            assertEquals(Decision.STAND, decision);
-        }
+	@Test
+	public void testStandOnWeakHandsVersusWeakDealerCards() {
+		List<Hand> weakPlayerHands = new ArrayList<Hand>();
+		weakPlayerHands.add(new Hand(new Card(Rank.THREE), new Card(Rank.JACK)));
+		weakPlayerHands.add(new Hand(new Card(Rank.FOUR), new Card(Rank.JACK)));
+		weakPlayerHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.JACK)));
+		weakPlayerHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.JACK)));
 
-        List<Hand> hitHands1 = new ArrayList<Hand>();
-        hitHands1.add(new Hand(new Card(Rank.THREE), new Card(Rank.JACK)));
-        hitHands1.add(new Hand(new Card(Rank.FOUR), new Card(Rank.JACK)));
-        hitHands1.add(new Hand(new Card(Rank.FIVE), new Card(Rank.JACK)));
-        hitHands1.add(new Hand(new Card(Rank.SIX), new Card(Rank.JACK)));
+		for (Hand weakPlayerHand : weakPlayerHands) {
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals(Decision.STAND, weakPlayerHand.getBasicStrategyDecision(weakDealerCard));
+			}
+		}
+	}
 
-        for (Hand playerHand : hitHands1) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.SEVEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.EIGHT));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.NINE));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.TEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.ACE));
-            assertEquals(Decision.HIT, decision);
-        }
+	@Test
+	public void testHitOnWeakHandsVersusStrongDealerCards() {
+		List<Hand> weakPlayerHands = new ArrayList<Hand>();
+		weakPlayerHands.add(new Hand(new Card(Rank.THREE), new Card(Rank.JACK)));
+		weakPlayerHands.add(new Hand(new Card(Rank.FOUR), new Card(Rank.JACK)));
+		weakPlayerHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.JACK)));
+		weakPlayerHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.JACK)));
 
-        List<Hand> hitHands2 = new ArrayList<Hand>();
-        hitHands2.add(new Hand(new Card(Rank.TWO), new Card(Rank.JACK)));
+		for (Hand weakPlayerHand : weakPlayerHands) {
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.HIT, weakPlayerHand.getBasicStrategyDecision(strongDealerCard));
+			}
+		}
+	}
 
-        for (Hand playerHand : hitHands2) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.TWO));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.THREE));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SEVEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.EIGHT));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.NINE));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.TEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.ACE));
-            assertEquals(Decision.HIT, decision);
-        }
+	@Test
+	public void testHitOnLowNonSplittableHandsVersusAllDealerCards() {
+		List<Hand> lowNonSplittablePlayerHands = new ArrayList<Hand>();
+		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.SIX)));
+		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.FIVE)));
+		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.FOUR)));
+		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.THREE)));
 
-        List<Hand> hitHands3 = new ArrayList<Hand>();
-        hitHands3.add(new Hand(new Card(Rank.TWO), new Card(Rank.SEVEN)));
+		for (Hand lowNonSplittablePlayerHand : lowNonSplittablePlayerHands) {
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.HIT, lowNonSplittablePlayerHand.getBasicStrategyDecision(strongDealerCard));
+			}
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals(Decision.HIT, lowNonSplittablePlayerHand.getBasicStrategyDecision(weakDealerCard));
+			}
+		}
+	}
 
-        for (Hand playerHand : hitHands3) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.TWO));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SEVEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.EIGHT));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.NINE));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.TEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.ACE));
-            assertEquals(Decision.HIT, decision);
-        }
+	@Test
+	public void testDoubleOnNineVersusWeakDealerCardsExceptTwo() {
+		List<Hand> nineHands = new ArrayList<Hand>();
+		nineHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.SEVEN)));
+		nineHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.THREE)));
 
-        List<Hand> hitHands4 = new ArrayList<Hand>();
-        hitHands4.add(new Hand(new Card(Rank.TWO), new Card(Rank.SIX)));
-        hitHands4.add(new Hand(new Card(Rank.TWO), new Card(Rank.FIVE)));
-        hitHands4.add(new Hand(new Card(Rank.TWO), new Card(Rank.FOUR)));
-        hitHands4.add(new Hand(new Card(Rank.TWO), new Card(Rank.THREE)));
+		for (Hand nineHand : nineHands) {
+			for (Card weakDealerCard : weakDealerCards) {
+				if (weakDealerCard.getRank().equals(Rank.TWO)) {
+					assertEquals(Decision.HIT, nineHand.getBasicStrategyDecision(weakDealerCard));
+				} else {
+					assertEquals(Decision.DOUBLE, nineHand.getBasicStrategyDecision(weakDealerCard));
+				}
+			}
+		}
+	}
 
-        for (Hand playerHand : hitHands4) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.TWO));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.THREE));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FOUR));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FIVE));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SIX));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SEVEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.EIGHT));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.NINE));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.TEN));
-            assertEquals(Decision.HIT, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.ACE));
-            assertEquals(Decision.HIT, decision);
-        }
+	@Test
+	public void testDoubleOnTenVersusAllCardsExceptTenAndAce() {
+		List<Hand> tenHands = new ArrayList<Hand>();
+		tenHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.EIGHT)));
+		tenHands.add(new Hand(new Card(Rank.SEVEN), new Card(Rank.THREE)));
 
-        List<Hand> doubleHands1 = new ArrayList<Hand>();
-        doubleHands1.add(new Hand(new Card(Rank.TWO), new Card(Rank.NINE)));
+		for (Hand tenHand : tenHands) {
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals(Decision.DOUBLE, tenHand.getBasicStrategyDecision(weakDealerCard));
+			}
+			for (Card strongDealerCard : strongDealerCards) {
+				if (strongDealerCard.getRank().equals(Rank.TEN) || strongDealerCard.getRank().equals(Rank.ACE)) {
+					assertEquals(Decision.HIT, tenHand.getBasicStrategyDecision(strongDealerCard));
+				} else {
+					assertEquals(Decision.DOUBLE, tenHand.getBasicStrategyDecision(strongDealerCard));
+				}
+			}
 
-        for (Hand playerHand : doubleHands1) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.TWO));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.THREE));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FOUR));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FIVE));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SIX));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SEVEN));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.EIGHT));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.NINE));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.TEN));
-            assertEquals(Decision.DOUBLE, decision);
-            // decision = playerHand.getBasicStrategyDecision(new
-            // Card(Rank.ACE));
-            // assertEquals(Decision.DOUBLE, decision);
-        }
+		}
+	}
 
-        List<Hand> doubleHands2 = new ArrayList<Hand>();
-        doubleHands2.add(new Hand(new Card(Rank.TWO), new Card(Rank.EIGHT)));
+	@Test
+	public void testDoubleOnElevenVersusAllCardsExceptAce() {
+		List<Hand> elevenHands = new ArrayList<Hand>();
+		elevenHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.NINE)));
 
-        for (Hand playerHand : doubleHands2) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.TWO));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.THREE));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FOUR));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FIVE));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SIX));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SEVEN));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.EIGHT));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.NINE));
-            assertEquals(Decision.DOUBLE, decision);
-        }
+		for (Hand elevenHand : elevenHands) {
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals(Decision.DOUBLE, elevenHand.getBasicStrategyDecision(weakDealerCard));
+			}
+			for (Card strongDealerCard : strongDealerCards) {
+				if (strongDealerCard.getRank().equals(Rank.ACE)) {
+					assertEquals(Decision.HIT, elevenHand.getBasicStrategyDecision(strongDealerCard));
+				} else {
+					assertEquals(Decision.DOUBLE, elevenHand.getBasicStrategyDecision(strongDealerCard));
+				}
+			}
+		}
+	}
 
-        List<Hand> doubleHands3 = new ArrayList<Hand>();
-        doubleHands3.add(new Hand(new Card(Rank.TWO), new Card(Rank.SEVEN)));
+	@Test
+	public void testDecisionsOnTwelveVersusAllCards() {
+		List<Hand> twelveHands = new ArrayList<Hand>();
+		twelveHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.JACK)));
+		twelveHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.SEVEN)));
 
-        for (Hand playerHand : doubleHands3) {
-            Decision decision = playerHand.getBasicStrategyDecision(new Card(Rank.THREE));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FOUR));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.FIVE));
-            assertEquals(Decision.DOUBLE, decision);
-            decision = playerHand.getBasicStrategyDecision(new Card(Rank.SIX));
-            assertEquals(Decision.DOUBLE, decision);
-        }
+		for (Hand twelveHand : twelveHands) {
+			for (Card weakDealerCard : weakDealerCards) {
+				if (weakDealerCard.getRank().equals(Rank.TWO) || weakDealerCard.getRank().equals(Rank.THREE)) {
+					assertEquals(Decision.HIT, twelveHand.getBasicStrategyDecision(weakDealerCard));
+				} else {
+					assertEquals(Decision.STAND, twelveHand.getBasicStrategyDecision(weakDealerCard));
+				}
+			}
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.HIT, twelveHand.getBasicStrategyDecision(strongDealerCard));
+			}
+		}
+	}
 
-    }
+	@Test
+	public void testHitOnNineVersusStrongDealerCardOrTwo() {
+		List<Hand> nineHands = new ArrayList<Hand>();
+		nineHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.SEVEN)));
+		nineHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.FOUR)));
+
+		for (Hand nineHand : nineHands) {
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.HIT, nineHand.getBasicStrategyDecision(strongDealerCard));
+			}
+			assertEquals(Decision.HIT, nineHand.getBasicStrategyDecision(new Card(Rank.TWO)));
+		}
+	}
+
+	@Test
+	public void testSplitOnSplittableHandsVersusWeakDealerCards() {
+		List<Hand> splittableHands = new ArrayList<Hand>();
+		splittableHands.add(new Hand(new Card(Rank.ACE), new Card(Rank.ACE)));
+		splittableHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.TWO)));
+		splittableHands.add(new Hand(new Card(Rank.THREE), new Card(Rank.THREE)));
+		splittableHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.SIX)));
+		splittableHands.add(new Hand(new Card(Rank.SEVEN), new Card(Rank.SEVEN)));
+		splittableHands.add(new Hand(new Card(Rank.EIGHT), new Card(Rank.EIGHT)));
+		splittableHands.add(new Hand(new Card(Rank.NINE), new Card(Rank.NINE)));
+
+		for (Hand splittableHand : splittableHands) {
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals(Decision.SPLIT, splittableHand.getBasicStrategyDecision(weakDealerCard));
+			}
+		}
+	}
+
+	@Test
+	public void testSplitOnSplittableHandsVersusStrongDealerCards() {
+		List<Hand> splittableHands = new ArrayList<Hand>();
+		splittableHands.add(new Hand(new Card(Rank.ACE), new Card(Rank.ACE)));
+		splittableHands.add(new Hand(new Card(Rank.EIGHT), new Card(Rank.EIGHT)));
+
+		for (Hand splittableHand : splittableHands) {
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.SPLIT, splittableHand.getBasicStrategyDecision(strongDealerCard));
+			}
+		}
+	}
+
 }

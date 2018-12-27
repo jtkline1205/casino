@@ -1,4 +1,5 @@
 package domain;
+
 public class Card {
 
 	private Rank rank;
@@ -6,6 +7,11 @@ public class Card {
 
 	public Card(Rank rank) {
 		this.rank = rank;
+		this.suit = Suit.SPADES;
+	}
+
+	public Card(int value) {
+		this.rank = Rank.getRankFromInt(value);
 		this.suit = Suit.SPADES;
 	}
 

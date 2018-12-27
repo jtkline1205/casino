@@ -1,9 +1,12 @@
 package domain;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Deck {
 	private List<Card> cards;
+
+	public static final int STANDARD_NUM_CARDS_IN_DECK = 52;
 
 	public Deck() {
 		this.cards = new ArrayList<Card>();

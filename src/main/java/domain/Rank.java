@@ -19,4 +19,13 @@ public enum Rank {
 	public char getLabel() {
 		return this.label;
 	}
+
+	public static Rank getRankFromInt(int value) {
+		for (Rank r : Rank.values()) {
+			if (value == r.getValue()) {
+				return r;
+			}
+		}
+		return null;
+	}
 }

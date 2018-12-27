@@ -11,50 +11,26 @@ public class Stack {
 		this.chips = chips;
 	}
 
-	public Stack(Double doubleValue) {
-		int numberOfOrangeChips = (int) (doubleValue / 500.00);
-		double leftOver = doubleValue % 500.00;
-		int numberOfBlackChips = (int) (leftOver / 100.00);
-		leftOver = leftOver % 100.00;
-		int numberOfGreenChips = (int) (leftOver / 25.00);
-		leftOver = leftOver % 25.00;
-		int numberOfRedChips = (int) (leftOver / 5.00);
-		leftOver = leftOver % 5.00;
-		int numberOfBlueChips = (int) (leftOver / 2.50);
-		leftOver = leftOver % 2.50;
-		int numberOfWhiteChips = (int) (leftOver / 1.00);
-
+	public Stack(Double remainingValue) {
 		this.chips = new ArrayList<Chip>();
+		remainingValue = addChips(Denomination.FIVE_HUNDRED, remainingValue);
+		remainingValue = addChips(Denomination.HUNDRED, remainingValue);
+		remainingValue = addChips(Denomination.TWENTY_FIVE, remainingValue);
+		remainingValue = addChips(Denomination.FIVE, remainingValue);
+		if (remainingValue % 1 == 0.50) {
+			remainingValue = addChips(Denomination.TWO_FIFTY, remainingValue);
+		}
+		remainingValue = addChips(Denomination.ONE, remainingValue);
+	}
 
-		for (int i = 0; i < numberOfOrangeChips; i++) {
-			Chip chip = new Chip(Denomination.FIVE_HUNDRED);
+	private Double addChips(Denomination d, Double doubleValue) {
+		int numberOfChips = (int) (doubleValue / d.getValue());
+		double leftOver = doubleValue % d.getValue();
+		for (int i = 0; i < numberOfChips; i++) {
+			Chip chip = new Chip(d);
 			this.chips.add(chip);
 		}
-
-		for (int i = 0; i < numberOfBlackChips; i++) {
-			Chip chip = new Chip(Denomination.HUNDRED);
-			this.chips.add(chip);
-		}
-
-		for (int i = 0; i < numberOfGreenChips; i++) {
-			Chip chip = new Chip(Denomination.TWENTY_FIVE);
-			this.chips.add(chip);
-		}
-
-		for (int i = 0; i < numberOfRedChips; i++) {
-			Chip chip = new Chip(Denomination.FIVE);
-			this.chips.add(chip);
-		}
-
-		for (int i = 0; i < numberOfBlueChips; i++) {
-			Chip chip = new Chip(Denomination.TWO_FIFTY);
-			this.chips.add(chip);
-		}
-
-		for (int i = 0; i < numberOfWhiteChips; i++) {
-			Chip chip = new Chip(Denomination.ONE);
-			this.chips.add(chip);
-		}
+		return leftOver;
 	}
 
 	public List<Chip> getChips() {
@@ -63,6 +39,16 @@ public class Stack {
 
 	public void setChips(List<Chip> chips) {
 		this.chips = chips;
+	}
+
+	public int countTypeOfChip(Denomination d) {
+		int count = 0;
+		for (Chip chip : this.chips) {
+			if (chip.getDenomination().equals(d)) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 }

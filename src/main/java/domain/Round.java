@@ -5,6 +5,7 @@ import panels.CardPanel;
 import panels.HandPanel;
 import panels.SeriesPanel;
 import service.BlackjackGame;
+import service.DecisionService;
 
 public class Round {
 
@@ -18,6 +19,7 @@ public class Round {
 	private BlackjackGame parent;
 	private Shoe shoe;
 	private Double playerBankroll;
+	private DecisionService decisionService;
 
 	public Round(Series playerSeries, Hand dealerHand, SeriesPanel playerSeriesPanel, HandPanel dealerHandPanel,
 			CardPanel dealerHoleCardPanelFaceUp, CardPanel dealerHoleCardPanelFaceDown, BlackjackPanel blackjackPanel,
@@ -32,6 +34,7 @@ public class Round {
 		this.parent = parent;
 		this.shoe = shoe;
 		this.playerBankroll = playerBankroll;
+		this.decisionService = new DecisionService();
 	}
 
 	public Double play() throws InterruptedException {
@@ -134,16 +137,16 @@ public class Round {
 		return true;
 	}
 
-	private Boolean runPlayerHitsOn16AndUnderUnlessWeakDealer(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
-			throws InterruptedException {
+	private Boolean runPlayerHitsOn16AndUnderUnlessWeakDealer(Hand playerHand, HandPanel playerHandPanel,
+			Card dealerUpCard) throws InterruptedException {
 		// ~43.25% win rate
-		 while (playerShouldHit16OrUnderUnlessWeakDealer(playerHand, dealerUpCard)) {
-			 drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
-			 if (playerHand.isBust()) {
-			 	return false;
-			 }
-		 }
-		 return true;
+		while (playerShouldHit16OrUnderUnlessWeakDealer(playerHand, dealerUpCard)) {
+			drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
+			if (playerHand.isBust()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private boolean playerShouldHit16OrUnder(Hand playerHand) {
@@ -163,7 +166,8 @@ public class Round {
 		}
 	}
 
-	private void drawCardAndUpdatePlayerHandPanel(Hand playerHand, HandPanel playerHandPanel) throws InterruptedException {
+	private void drawCardAndUpdatePlayerHandPanel(Hand playerHand, HandPanel playerHandPanel)
+			throws InterruptedException {
 		log("Drawing card for Player.");
 		Card newCard = shoe.drawCard();
 		playerHand.addCard(newCard);
@@ -176,9 +180,11 @@ public class Round {
 		Hand playerFirstHand = playerSeries.getHands().get(0);
 		HandPanel playerFirstHandPanel = playerSeriesPanel.getHandPanels().get(0);
 
-		// return runPlayerHitsOn16AndUnder(playerFirstHand, playerFirstHandPanel);
+		// return runPlayerHitsOn16AndUnder(playerFirstHand,
+		// playerFirstHandPanel);
 
-		// return runPlayerHitsOn16AndUnderUnlessWeakDealer(playerFirstHand, playerFirstHandPanel, dealerUpCard);
+		// return runPlayerHitsOn16AndUnderUnlessWeakDealer(playerFirstHand,
+		// playerFirstHandPanel, dealerUpCard);
 
 		// Basic Strategy Iteration 1
 		// ~42.30% win rate
@@ -190,7 +196,7 @@ public class Round {
 			SeriesPanel playerSeriesPanel, Card dealerUpCard) throws InterruptedException {
 		Decision decision = blackjackPanel.getLatestDecision();
 		if (decision == null) {
-			decision = playerHand.getBasicStrategyDecision(dealerUpCard);
+			decision = decisionService.getBasicStrategyDecision(playerHand, dealerUpCard);
 		}
 		log(playerHand + " decision: " + decision.getName());
 		if (decision == Decision.STAND) {
@@ -277,7 +283,7 @@ public class Round {
 				if (playerHand.isBust()) {
 					return false;
 				}
-				decision = playerHand.getBasicStrategyDecision(dealerUpCard);
+				decision = decisionService.getBasicStrategyDecision(playerHand, dealerUpCard);
 			}
 			return true;
 		}

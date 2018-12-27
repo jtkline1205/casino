@@ -9,6 +9,7 @@ import domain.Card;
 import domain.Decision;
 import domain.Hand;
 import domain.Rank;
+import service.DecisionService;
 
 public class BasicStrategyTests {
 
@@ -18,20 +19,28 @@ public class BasicStrategyTests {
 	private Card[] strongDealerCards = new Card[] { new Card(Rank.SEVEN), new Card(Rank.EIGHT), new Card(Rank.NINE),
 			new Card(Rank.TEN), new Card(Rank.ACE) };
 
+	private Hand createHand(int value1, int value2) {
+		return HandFactory.createHand(value1, value2);
+	}
+
+	private DecisionService decisionService = new DecisionService();
+
 	@Test
 	public void testStandOnStrongHandsVersusAllDealerCards() {
 		List<Hand> strongPlayerHands = new ArrayList<Hand>();
-		strongPlayerHands.add(new Hand(new Card(Rank.SEVEN), new Card(Rank.JACK)));
-		strongPlayerHands.add(new Hand(new Card(Rank.EIGHT), new Card(Rank.JACK)));
-		strongPlayerHands.add(new Hand(new Card(Rank.NINE), new Card(Rank.JACK)));
-		strongPlayerHands.add(new Hand(new Card(Rank.JACK), new Card(Rank.JACK)));
+		strongPlayerHands.add(createHand(7, 10));
+		strongPlayerHands.add(createHand(8, 10));
+		strongPlayerHands.add(createHand(9, 10));
+		strongPlayerHands.add(createHand(10, 10));
 
 		for (Hand strongPlayerHand : strongPlayerHands) {
 			for (Card weakDealerCard : weakDealerCards) {
-				assertEquals(Decision.STAND, strongPlayerHand.getBasicStrategyDecision(weakDealerCard));
+				assertEquals(Decision.STAND,
+						decisionService.getBasicStrategyDecision(strongPlayerHand, weakDealerCard));
 			}
 			for (Card strongDealerCard : strongDealerCards) {
-				assertEquals(Decision.STAND, strongPlayerHand.getBasicStrategyDecision(strongDealerCard));
+				assertEquals(Decision.STAND,
+						decisionService.getBasicStrategyDecision(strongPlayerHand, strongDealerCard));
 			}
 		}
 	}
@@ -39,14 +48,14 @@ public class BasicStrategyTests {
 	@Test
 	public void testStandOnWeakHandsVersusWeakDealerCards() {
 		List<Hand> weakPlayerHands = new ArrayList<Hand>();
-		weakPlayerHands.add(new Hand(new Card(Rank.THREE), new Card(Rank.JACK)));
-		weakPlayerHands.add(new Hand(new Card(Rank.FOUR), new Card(Rank.JACK)));
-		weakPlayerHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.JACK)));
-		weakPlayerHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.JACK)));
+		weakPlayerHands.add(createHand(3, 10));
+		weakPlayerHands.add(createHand(4, 10));
+		weakPlayerHands.add(createHand(5, 10));
+		weakPlayerHands.add(createHand(6, 10));
 
 		for (Hand weakPlayerHand : weakPlayerHands) {
 			for (Card weakDealerCard : weakDealerCards) {
-				assertEquals(Decision.STAND, weakPlayerHand.getBasicStrategyDecision(weakDealerCard));
+				assertEquals(Decision.STAND, decisionService.getBasicStrategyDecision(weakPlayerHand, weakDealerCard));
 			}
 		}
 	}
@@ -54,14 +63,14 @@ public class BasicStrategyTests {
 	@Test
 	public void testHitOnWeakHandsVersusStrongDealerCards() {
 		List<Hand> weakPlayerHands = new ArrayList<Hand>();
-		weakPlayerHands.add(new Hand(new Card(Rank.THREE), new Card(Rank.JACK)));
-		weakPlayerHands.add(new Hand(new Card(Rank.FOUR), new Card(Rank.JACK)));
-		weakPlayerHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.JACK)));
-		weakPlayerHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.JACK)));
+		weakPlayerHands.add(createHand(3, 10));
+		weakPlayerHands.add(createHand(4, 10));
+		weakPlayerHands.add(createHand(5, 10));
+		weakPlayerHands.add(createHand(6, 10));
 
 		for (Hand weakPlayerHand : weakPlayerHands) {
 			for (Card strongDealerCard : strongDealerCards) {
-				assertEquals(Decision.HIT, weakPlayerHand.getBasicStrategyDecision(strongDealerCard));
+				assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(weakPlayerHand, strongDealerCard));
 			}
 		}
 	}
@@ -69,17 +78,19 @@ public class BasicStrategyTests {
 	@Test
 	public void testHitOnLowNonSplittableHandsVersusAllDealerCards() {
 		List<Hand> lowNonSplittablePlayerHands = new ArrayList<Hand>();
-		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.SIX)));
-		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.FIVE)));
-		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.FOUR)));
-		lowNonSplittablePlayerHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.THREE)));
+		lowNonSplittablePlayerHands.add(createHand(2, 6));
+		lowNonSplittablePlayerHands.add(createHand(2, 5));
+		lowNonSplittablePlayerHands.add(createHand(2, 4));
+		lowNonSplittablePlayerHands.add(createHand(2, 3));
 
 		for (Hand lowNonSplittablePlayerHand : lowNonSplittablePlayerHands) {
 			for (Card strongDealerCard : strongDealerCards) {
-				assertEquals(Decision.HIT, lowNonSplittablePlayerHand.getBasicStrategyDecision(strongDealerCard));
+				assertEquals(Decision.HIT,
+						decisionService.getBasicStrategyDecision(lowNonSplittablePlayerHand, strongDealerCard));
 			}
 			for (Card weakDealerCard : weakDealerCards) {
-				assertEquals(Decision.HIT, lowNonSplittablePlayerHand.getBasicStrategyDecision(weakDealerCard));
+				assertEquals(Decision.HIT,
+						decisionService.getBasicStrategyDecision(lowNonSplittablePlayerHand, weakDealerCard));
 			}
 		}
 	}
@@ -87,15 +98,15 @@ public class BasicStrategyTests {
 	@Test
 	public void testDoubleOnNineVersusWeakDealerCardsExceptTwo() {
 		List<Hand> nineHands = new ArrayList<Hand>();
-		nineHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.SEVEN)));
-		nineHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.THREE)));
+		nineHands.add(createHand(2, 7));
+		nineHands.add(createHand(6, 3));
 
 		for (Hand nineHand : nineHands) {
 			for (Card weakDealerCard : weakDealerCards) {
 				if (weakDealerCard.getRank().equals(Rank.TWO)) {
-					assertEquals(Decision.HIT, nineHand.getBasicStrategyDecision(weakDealerCard));
+					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(nineHand, weakDealerCard));
 				} else {
-					assertEquals(Decision.DOUBLE, nineHand.getBasicStrategyDecision(weakDealerCard));
+					assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(nineHand, weakDealerCard));
 				}
 			}
 		}
@@ -104,18 +115,18 @@ public class BasicStrategyTests {
 	@Test
 	public void testDoubleOnTenVersusAllCardsExceptTenAndAce() {
 		List<Hand> tenHands = new ArrayList<Hand>();
-		tenHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.EIGHT)));
-		tenHands.add(new Hand(new Card(Rank.SEVEN), new Card(Rank.THREE)));
+		tenHands.add(createHand(2, 8));
+		tenHands.add(createHand(7, 3));
 
 		for (Hand tenHand : tenHands) {
 			for (Card weakDealerCard : weakDealerCards) {
-				assertEquals(Decision.DOUBLE, tenHand.getBasicStrategyDecision(weakDealerCard));
+				assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(tenHand, weakDealerCard));
 			}
 			for (Card strongDealerCard : strongDealerCards) {
 				if (strongDealerCard.getRank().equals(Rank.TEN) || strongDealerCard.getRank().equals(Rank.ACE)) {
-					assertEquals(Decision.HIT, tenHand.getBasicStrategyDecision(strongDealerCard));
+					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(tenHand, strongDealerCard));
 				} else {
-					assertEquals(Decision.DOUBLE, tenHand.getBasicStrategyDecision(strongDealerCard));
+					assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(tenHand, strongDealerCard));
 				}
 			}
 
@@ -125,17 +136,18 @@ public class BasicStrategyTests {
 	@Test
 	public void testDoubleOnElevenVersusAllCardsExceptAce() {
 		List<Hand> elevenHands = new ArrayList<Hand>();
-		elevenHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.NINE)));
+		elevenHands.add(createHand(2, 9));
 
 		for (Hand elevenHand : elevenHands) {
 			for (Card weakDealerCard : weakDealerCards) {
-				assertEquals(Decision.DOUBLE, elevenHand.getBasicStrategyDecision(weakDealerCard));
+				assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(elevenHand, weakDealerCard));
 			}
 			for (Card strongDealerCard : strongDealerCards) {
 				if (strongDealerCard.getRank().equals(Rank.ACE)) {
-					assertEquals(Decision.HIT, elevenHand.getBasicStrategyDecision(strongDealerCard));
+					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(elevenHand, strongDealerCard));
 				} else {
-					assertEquals(Decision.DOUBLE, elevenHand.getBasicStrategyDecision(strongDealerCard));
+					assertEquals(Decision.DOUBLE,
+							decisionService.getBasicStrategyDecision(elevenHand, strongDealerCard));
 				}
 			}
 		}
@@ -144,19 +156,19 @@ public class BasicStrategyTests {
 	@Test
 	public void testDecisionsOnTwelveVersusAllCards() {
 		List<Hand> twelveHands = new ArrayList<Hand>();
-		twelveHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.JACK)));
-		twelveHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.SEVEN)));
+		twelveHands.add(createHand(2, 10));
+		twelveHands.add(createHand(5, 7));
 
 		for (Hand twelveHand : twelveHands) {
 			for (Card weakDealerCard : weakDealerCards) {
 				if (weakDealerCard.getRank().equals(Rank.TWO) || weakDealerCard.getRank().equals(Rank.THREE)) {
-					assertEquals(Decision.HIT, twelveHand.getBasicStrategyDecision(weakDealerCard));
+					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(twelveHand, weakDealerCard));
 				} else {
-					assertEquals(Decision.STAND, twelveHand.getBasicStrategyDecision(weakDealerCard));
+					assertEquals(Decision.STAND, decisionService.getBasicStrategyDecision(twelveHand, weakDealerCard));
 				}
 			}
 			for (Card strongDealerCard : strongDealerCards) {
-				assertEquals(Decision.HIT, twelveHand.getBasicStrategyDecision(strongDealerCard));
+				assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(twelveHand, strongDealerCard));
 			}
 		}
 	}
@@ -164,31 +176,31 @@ public class BasicStrategyTests {
 	@Test
 	public void testHitOnNineVersusStrongDealerCardOrTwo() {
 		List<Hand> nineHands = new ArrayList<Hand>();
-		nineHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.SEVEN)));
-		nineHands.add(new Hand(new Card(Rank.FIVE), new Card(Rank.FOUR)));
+		nineHands.add(createHand(2, 7));
+		nineHands.add(createHand(5, 4));
 
 		for (Hand nineHand : nineHands) {
 			for (Card strongDealerCard : strongDealerCards) {
-				assertEquals(Decision.HIT, nineHand.getBasicStrategyDecision(strongDealerCard));
+				assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(nineHand, strongDealerCard));
 			}
-			assertEquals(Decision.HIT, nineHand.getBasicStrategyDecision(new Card(Rank.TWO)));
+			assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(nineHand, new Card(Rank.TWO)));
 		}
 	}
 
 	@Test
 	public void testSplitOnSplittableHandsVersusWeakDealerCards() {
 		List<Hand> splittableHands = new ArrayList<Hand>();
-		splittableHands.add(new Hand(new Card(Rank.ACE), new Card(Rank.ACE)));
-		splittableHands.add(new Hand(new Card(Rank.TWO), new Card(Rank.TWO)));
-		splittableHands.add(new Hand(new Card(Rank.THREE), new Card(Rank.THREE)));
-		splittableHands.add(new Hand(new Card(Rank.SIX), new Card(Rank.SIX)));
-		splittableHands.add(new Hand(new Card(Rank.SEVEN), new Card(Rank.SEVEN)));
-		splittableHands.add(new Hand(new Card(Rank.EIGHT), new Card(Rank.EIGHT)));
-		splittableHands.add(new Hand(new Card(Rank.NINE), new Card(Rank.NINE)));
+		splittableHands.add(createHand(11, 11));
+		splittableHands.add(createHand(2, 2));
+		splittableHands.add(createHand(3, 3));
+		splittableHands.add(createHand(6, 6));
+		splittableHands.add(createHand(7, 7));
+		splittableHands.add(createHand(8, 8));
+		splittableHands.add(createHand(9, 9));
 
 		for (Hand splittableHand : splittableHands) {
 			for (Card weakDealerCard : weakDealerCards) {
-				assertEquals(Decision.SPLIT, splittableHand.getBasicStrategyDecision(weakDealerCard));
+				assertEquals(Decision.SPLIT, decisionService.getBasicStrategyDecision(splittableHand, weakDealerCard));
 			}
 		}
 	}
@@ -196,12 +208,13 @@ public class BasicStrategyTests {
 	@Test
 	public void testSplitOnSplittableHandsVersusStrongDealerCards() {
 		List<Hand> splittableHands = new ArrayList<Hand>();
-		splittableHands.add(new Hand(new Card(Rank.ACE), new Card(Rank.ACE)));
-		splittableHands.add(new Hand(new Card(Rank.EIGHT), new Card(Rank.EIGHT)));
+		splittableHands.add(createHand(11, 11));
+		splittableHands.add(createHand(8, 8));
 
 		for (Hand splittableHand : splittableHands) {
 			for (Card strongDealerCard : strongDealerCards) {
-				assertEquals(Decision.SPLIT, splittableHand.getBasicStrategyDecision(strongDealerCard));
+				assertEquals(Decision.SPLIT,
+						decisionService.getBasicStrategyDecision(splittableHand, strongDealerCard));
 			}
 		}
 	}

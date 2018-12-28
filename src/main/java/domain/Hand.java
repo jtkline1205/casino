@@ -31,8 +31,12 @@ public class Hand {
 		this.bet = bet;
 	}
 
-	public List<Card> getCards() {
-		return this.cards;
+	public Card getFirstCard() {
+		return this.cards.get(0);
+	}
+
+	public Card getSecondCard() {
+		return this.cards.get(1);
 	}
 
 	public Double getBet() {

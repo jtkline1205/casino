@@ -23,6 +23,10 @@ public class Series {
 		this.hands.add(hand);
 	}
 
+	public void removeHand(Hand hand) {
+		this.hands.remove(hand);
+	}
+
 	public Double getTotalBet() {
 		Double totalBet = 0.00;
 		for (Hand hand : hands) {

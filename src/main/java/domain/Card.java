@@ -28,6 +28,10 @@ public class Card {
 		this.rank = rank;
 	}
 
+	public int getValue() {
+		return this.rank.getValue();
+	}
+
 	public Suit getSuit() {
 		return suit;
 	}

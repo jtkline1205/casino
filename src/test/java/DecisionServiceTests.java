@@ -11,7 +11,7 @@ import domain.Hand;
 import domain.Rank;
 import service.DecisionService;
 
-public class BasicStrategyTests {
+public class DecisionServiceTests {
 
 	private Card[] weakDealerCards = new Card[] { new Card(Rank.TWO), new Card(Rank.THREE), new Card(Rank.FOUR),
 			new Card(Rank.FIVE), new Card(Rank.SIX) };
@@ -103,7 +103,7 @@ public class BasicStrategyTests {
 
 		for (Hand nineHand : nineHands) {
 			for (Card weakDealerCard : weakDealerCards) {
-				if (weakDealerCard.getRank().equals(Rank.TWO)) {
+				if (weakDealerCard.getValue() == 2) {
 					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(nineHand, weakDealerCard));
 				} else {
 					assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(nineHand, weakDealerCard));
@@ -123,7 +123,7 @@ public class BasicStrategyTests {
 				assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(tenHand, weakDealerCard));
 			}
 			for (Card strongDealerCard : strongDealerCards) {
-				if (strongDealerCard.getRank().equals(Rank.TEN) || strongDealerCard.getRank().equals(Rank.ACE)) {
+				if (strongDealerCard.getValue() == 10 || strongDealerCard.getValue() == 11) {
 					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(tenHand, strongDealerCard));
 				} else {
 					assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(tenHand, strongDealerCard));
@@ -143,7 +143,7 @@ public class BasicStrategyTests {
 				assertEquals(Decision.DOUBLE, decisionService.getBasicStrategyDecision(elevenHand, weakDealerCard));
 			}
 			for (Card strongDealerCard : strongDealerCards) {
-				if (strongDealerCard.getRank().equals(Rank.ACE)) {
+				if (strongDealerCard.getValue() == 11) {
 					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(elevenHand, strongDealerCard));
 				} else {
 					assertEquals(Decision.DOUBLE,
@@ -161,7 +161,7 @@ public class BasicStrategyTests {
 
 		for (Hand twelveHand : twelveHands) {
 			for (Card weakDealerCard : weakDealerCards) {
-				if (weakDealerCard.getRank().equals(Rank.TWO) || weakDealerCard.getRank().equals(Rank.THREE)) {
+				if (weakDealerCard.getValue() == 2 || weakDealerCard.getValue() == 3) {
 					assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(twelveHand, weakDealerCard));
 				} else {
 					assertEquals(Decision.STAND, decisionService.getBasicStrategyDecision(twelveHand, weakDealerCard));
@@ -215,6 +215,73 @@ public class BasicStrategyTests {
 			for (Card strongDealerCard : strongDealerCards) {
 				assertEquals(Decision.SPLIT,
 						decisionService.getBasicStrategyDecision(splittableHand, strongDealerCard));
+			}
+		}
+	}
+
+	@Test
+	public void testDecisionsOnSoftHandsBelow18() {
+		List<Hand> softHands = new ArrayList<Hand>();
+		softHands.add(createHand(11, 2));
+		softHands.add(createHand(11, 3));
+		softHands.add(createHand(11, 4));
+		softHands.add(createHand(11, 5));
+		softHands.add(createHand(11, 6));
+
+		for (Hand softHand : softHands) {
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.HIT, decisionService.getBasicStrategyDecision(softHand, strongDealerCard));
+			}
+			for (Card weakDealerCard : weakDealerCards) {
+				int handValue = softHand.calculateValue();
+				switch (handValue) {
+				case 13:
+				case 14:
+					assertEquals((weakDealerCard.getValue() < 5 ? Decision.HIT : Decision.DOUBLE),
+							decisionService.getBasicStrategyDecision(softHand, weakDealerCard));
+					break;
+				case 15:
+				case 16:
+					assertEquals((weakDealerCard.getValue() < 4 ? Decision.HIT : Decision.DOUBLE),
+							decisionService.getBasicStrategyDecision(softHand, weakDealerCard));
+					break;
+				case 17:
+					assertEquals((weakDealerCard.getValue() < 3 ? Decision.HIT : Decision.DOUBLE),
+							decisionService.getBasicStrategyDecision(softHand, weakDealerCard));
+				}
+			}
+		}
+	}
+
+	@Test
+	public void testDecisionsOnSoft18() {
+		List<Hand> softHands = new ArrayList<Hand>();
+		softHands.add(createHand(11, 7));
+
+		for (Hand softHand : softHands) {
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals((strongDealerCard.getValue() < 9 ? Decision.STAND : Decision.HIT),
+						decisionService.getBasicStrategyDecision(softHand, strongDealerCard));
+			}
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals((weakDealerCard.getValue() < 3 ? Decision.STAND : Decision.DOUBLE),
+						decisionService.getBasicStrategyDecision(softHand, weakDealerCard));
+			}
+		}
+	}
+
+	@Test
+	public void testStandOnSoftHandsAbove18() {
+		List<Hand> softHands = new ArrayList<Hand>();
+		softHands.add(createHand(11, 8));
+		softHands.add(createHand(11, 9));
+
+		for (Hand softHand : softHands) {
+			for (Card strongDealerCard : strongDealerCards) {
+				assertEquals(Decision.STAND, decisionService.getBasicStrategyDecision(softHand, strongDealerCard));
+			}
+			for (Card weakDealerCard : weakDealerCards) {
+				assertEquals(Decision.STAND, decisionService.getBasicStrategyDecision(softHand, weakDealerCard));
 			}
 		}
 	}

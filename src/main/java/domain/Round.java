@@ -79,7 +79,7 @@ public class Round {
 		// Phase 2: Player Round
 		if (!roundOver) {
 			log("Running player Series.");
-			dealerMustResolve = runPlayerSeries(playerSeries, dealerHand.getCards().get(0), playerSeriesPanel);
+			dealerMustResolve = runPlayerSeries(playerSeries, dealerHand.getFirstCard(), playerSeriesPanel);
 		}
 
 		// Phase 3: Dealer Round
@@ -189,11 +189,82 @@ public class Round {
 		// Basic Strategy Iteration 1
 		// ~42.30% win rate
 
-		return runPlayerHand(playerFirstHand, playerFirstHandPanel, playerSeries, playerSeriesPanel, dealerUpCard);
+		return runPlayerHand(playerFirstHand, playerFirstHandPanel, dealerUpCard);
 	}
 
-	private Boolean runPlayerHand(Hand playerHand, HandPanel playerHandPanel, Series playerSeries,
-			SeriesPanel playerSeriesPanel, Card dealerUpCard) throws InterruptedException {
+	private boolean runDoubleDecision(Hand playerHand, HandPanel playerHandPanel) throws InterruptedException {
+		blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet() + playerHand.getBet());
+		playerHand.doubleBet();
+		Card card = shoe.drawCard();
+		playerHand.addCard(card);
+		playerHandPanel.add(new CardPanel(card));
+		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
+		parent.packAndWait();
+		return true;
+	}
+
+	private boolean runSplitDecision(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
+			throws InterruptedException {
+		playerSeries.removeHand(playerHand);
+		playerSeriesPanel.removeHandPanel(playerHandPanel);
+		playerSeriesPanel.remove(playerHandPanel);
+
+		Card newCard1 = shoe.drawCard();
+		Hand newHand1 = new Hand(playerHand.getFirstCard(), newCard1, playerHand.getBet());
+		playerSeries.addHand(newHand1);
+
+		// Create child HandPanel 1 and add to SeriesPanel
+		CardPanel newCardPanel1 = new CardPanel(playerHand.getFirstCard());
+		CardPanel newCardPanel2 = new CardPanel(newCard1);
+		HandPanel newHandPanel1 = new HandPanel();
+		newHandPanel1.add(newCardPanel1);
+		newHandPanel1.add(newCardPanel2);
+		playerSeriesPanel.add(newHandPanel1);
+		playerSeriesPanel.addHandPanel(newHandPanel1);
+
+		// Create child Hand 2 and add to Series
+		Hand newHand2 = new Hand(playerHand.getSecondCard(), playerHand.getBet());
+		playerSeries.addHand(newHand2);
+
+		// Create child HandPanel 2 and add to SeriesPanel
+		CardPanel newCardPanel3 = new CardPanel(playerHand.getSecondCard());
+		HandPanel newHandPanel2 = new HandPanel();
+		newHandPanel2.add(newCardPanel3);
+		playerSeriesPanel.add(newHandPanel2);
+		playerSeriesPanel.addHandPanel(newHandPanel2);
+
+		blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet());
+		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
+
+		// Repaint
+		parent.packAndWait();
+
+		// Run child Hand 1 if first card was not an Ace
+		Boolean hand1NeedsResolution = true;
+		if (!newHand1.getFirstCard().getRank().equals(Rank.ACE)) {
+			hand1NeedsResolution = runPlayerHand(newHand1, newHandPanel1, dealerUpCard);
+		}
+
+		// Draw card for child Hand 2
+		Card newCard2 = shoe.drawCard();
+		newHand2.addCard(newCard2);
+		CardPanel newCardPanel4 = new CardPanel(newCard2);
+		newHandPanel2.add(newCardPanel4);
+
+		// Repaint
+		parent.packAndWait();
+
+		// Run child Hand 2 if first card was not an Ace
+		Boolean hand2NeedsResolution = true;
+		if (!newHand2.getFirstCard().getRank().equals(Rank.ACE)) {
+			hand2NeedsResolution = runPlayerHand(newHand2, newHandPanel2, dealerUpCard);
+		}
+
+		return hand1NeedsResolution || hand2NeedsResolution;
+	}
+
+	private Boolean runPlayerHand(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
+			throws InterruptedException {
 		Decision decision = blackjackPanel.getLatestDecision();
 		if (decision == null) {
 			decision = decisionService.getBasicStrategyDecision(playerHand, dealerUpCard);
@@ -202,77 +273,9 @@ public class Round {
 		if (decision == Decision.STAND) {
 			return true;
 		} else if (decision == Decision.DOUBLE) {
-			blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet() + playerHand.getBet());
-			playerHand.doubleBet();
-			Card card = shoe.drawCard();
-			playerHand.addCard(card);
-			playerHandPanel.add(new CardPanel(card));
-			blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
-			parent.packAndWait();
-			return true;
+			return runDoubleDecision(playerHand, playerHandPanel);
 		} else if (decision == Decision.SPLIT) {
-			// Remove spltting Hand from Series
-			playerSeries.getHands().remove(playerHand);
-
-			// Remove splitting HandPanel from SeriesPanel
-			playerSeriesPanel.removeHandPanel(playerHandPanel);
-			playerSeriesPanel.remove(playerHandPanel);
-
-			// Create child Hand 1 and add to Series
-			Card newCard1 = shoe.drawCard();
-			Hand newHand1 = new Hand(playerHand.getCards().get(0), newCard1, playerHand.getBet());
-			playerSeries.addHand(newHand1);
-
-			// Create child HandPanel 1 and add to SeriesPanel
-			CardPanel newCardPanel1 = new CardPanel(playerHand.getCards().get(0));
-			CardPanel newCardPanel2 = new CardPanel(newCard1);
-			HandPanel newHandPanel1 = new HandPanel();
-			newHandPanel1.add(newCardPanel1);
-			newHandPanel1.add(newCardPanel2);
-			playerSeriesPanel.add(newHandPanel1);
-			playerSeriesPanel.addHandPanel(newHandPanel1);
-
-			// Create child Hand 2 and add to Series
-			Hand newHand2 = new Hand(playerHand.getCards().get(1), playerHand.getBet());
-			playerSeries.addHand(newHand2);
-
-			// Create child HandPanel 2 and add to SeriesPanel
-			CardPanel newCardPanel3 = new CardPanel(playerHand.getCards().get(1));
-			HandPanel newHandPanel2 = new HandPanel();
-			newHandPanel2.add(newCardPanel3);
-			playerSeriesPanel.add(newHandPanel2);
-			playerSeriesPanel.addHandPanel(newHandPanel2);
-
-			blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet());
-			blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
-
-			// Repaint
-			parent.packAndWait();
-
-			// Run child Hand 1 if first card was not an Ace
-			Boolean hand1NeedsResolution = true;
-			if (!newHand1.getCards().get(0).getRank().equals(Rank.ACE)) {
-				hand1NeedsResolution = runPlayerHand(newHand1, newHandPanel1, playerSeries, playerSeriesPanel,
-						dealerUpCard);
-			}
-
-			// Draw card for child Hand 2
-			Card newCard2 = shoe.drawCard();
-			newHand2.addCard(newCard2);
-			CardPanel newCardPanel4 = new CardPanel(newCard2);
-			newHandPanel2.add(newCardPanel4);
-
-			// Repaint
-			parent.packAndWait();
-
-			// Run child Hand 2 if first card was not an Ace
-			Boolean hand2NeedsResolution = true;
-			if (!newHand2.getCards().get(0).getRank().equals(Rank.ACE)) {
-				hand2NeedsResolution = runPlayerHand(newHand2, newHandPanel2, playerSeries, playerSeriesPanel,
-						dealerUpCard);
-			}
-
-			return hand1NeedsResolution || hand2NeedsResolution;
+			return runSplitDecision(playerHand, playerHandPanel, dealerUpCard);
 		} else {
 			while (decision == Decision.HIT) {
 				log(playerHand + " decision: " + decision.getName());

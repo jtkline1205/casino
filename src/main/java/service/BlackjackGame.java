@@ -1,11 +1,13 @@
 package service;
 
-import java.awt.Color;
-
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import domain.*;
+import domain.Card;
+import domain.Hand;
+import domain.Round;
+import domain.Series;
+import domain.Shoe;
 import panels.BlackjackPanel;
 import panels.CardPanel;
 import panels.HandPanel;
@@ -27,8 +29,6 @@ public class BlackjackGame extends JFrame {
 	private static final String GAME_TITLE = "Blackjack";
 	private static final String[] WELCOME_MESSAGES = { "Welcome to Blackjack.", "Blackjacks Pay 3:2",
 			"Dealer Stands on All 17s", "Re-splitting Aces is not allowed" };
-
-	private static final Color FELT_COLOR = new Color(0, 100, 0);
 
 	private Double playerBet = 10.00;
 	private Double playerBankroll = 200.00;
@@ -131,7 +131,6 @@ public class BlackjackGame extends JFrame {
 		blackjackPanel = new BlackjackPanel();
 		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerBet);
 		add(blackjackPanel);
-//		setBackground(FELT_COLOR);
 	}
 
 	private void log(String string) {

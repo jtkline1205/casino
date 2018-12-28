@@ -1,6 +1,5 @@
 package panels;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -20,7 +19,7 @@ public class CardPanel extends JPanel {
 	public CardPanel() {
 		try {
 			image = ImageIO.read(new File("src/main/resources/card_back.png"));
-//			this.setBackground(new Color(0, 100, 0));
+			this.setBackground(BlackjackPanel.FELT_GREEN);
 		} catch (IOException ex) {
 			System.out.println("Could not find file.");
 		}
@@ -29,7 +28,7 @@ public class CardPanel extends JPanel {
 	public CardPanel(Card card) {
 		try {
 			image = ImageIO.read(new File("src/main/resources/" + card.getResourceName() + ".png"));
-//			this.setBackground(new Color(0, 100, 0));
+			this.setBackground(BlackjackPanel.FELT_GREEN);
 		} catch (IOException ex) {
 			System.out.println("Could not find file.");
 		}
@@ -39,7 +38,7 @@ public class CardPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.drawImage(image, 0, 0, null); // see javadoc for more info on the
-										// parameters
+		// parameters
 	}
 
 }

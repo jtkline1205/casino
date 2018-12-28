@@ -22,6 +22,7 @@ public class StackPanel extends JPanel {
 
 	public StackPanel(Stack stack, Color backgroundColor) {
 		this.setLayout(new GridLayout(1, 0));
+		this.setBackground(backgroundColor);
 		for (Chip chip : stack.getChips()) {
 			ChipPanel chipPanel = new ChipPanel(chip);
 			chipPanel.setBackground(backgroundColor);

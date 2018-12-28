@@ -48,7 +48,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 
 	private boolean continueGame = false;
 
-	private final Color FELT_GREEN = new Color(0, 100, 0);
+	public static final Color FELT_GREEN = new Color(0, 100, 0);
 	private final Color GOLD = new Color(182, 182, 29);
 	private final Color PURPLE = new Color(177, 82, 182);
 	private final Color BLUE = new Color(117, 166, 255);
@@ -58,11 +58,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		initializeComponents();
 		setupTitleLabel1();
 		setupTitleLabel2();
-		continueButton.addActionListener(this);
-		hitButton.addActionListener(this);
-		standButton.addActionListener(this);
-		splitButton.addActionListener(this);
-		doubleButton.addActionListener(this);
+		addActionListeners();
 		setLayouts();
 		setPreferredSizes();
 		addComponents();
@@ -72,9 +68,17 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		return this.latestDecision;
 	}
 
+	private void addActionListeners() {
+		continueButton.addActionListener(this);
+		hitButton.addActionListener(this);
+		standButton.addActionListener(this);
+		splitButton.addActionListener(this);
+		doubleButton.addActionListener(this);
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		String buttonText = ((JButton)ae.getSource()).getText();
+		String buttonText = ((JButton) ae.getSource()).getText();
 		if (buttonText.equals("Continue")) {
 			latestDecision = null;
 		} else if (buttonText.equals("Hit")) {
@@ -116,8 +120,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		playerActiveChipsPanel.remove(playerBetPanel);
 		playerActiveChipsPanel.remove(playerWinningsPanel);
 
-		playerBetPanel = new StackPanel(new Stack(playerBet), GOLD);
-		playerBetPanel.setBackground(GOLD);
+		playerBetPanel = new StackPanel(new Stack(playerBet), BLUE);
 
 		playerActiveChipsPanel.add(playerBetPanel);
 		playerActiveChipsPanel.add(playerWinningsPanel);
@@ -133,41 +136,15 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		if (doubleValue < 0) {
 			resultStack = new Stack(-1 * doubleValue);
 			houseBankPanel = new StackPanel(resultStack, PURPLE);
-			houseBankPanel.setBackground(PURPLE);
 		} else if (doubleValue > 0) {
 			resultStack = new Stack(doubleValue);
-			playerWinningsPanel = new StackPanel(resultStack, BLUE);
-			playerWinningsPanel.setBackground(BLUE);
+			playerWinningsPanel = new StackPanel(resultStack, GOLD);
 		}
 
 		resultPanel.add(houseBankPanel);
 		playerActiveChipsPanel.add(playerBetPanel);
 		playerActiveChipsPanel.add(playerWinningsPanel);
 		resultPanel.add(playerActiveChipsPanel);
-	}
-
-	private void initializeComponents() {
-		topPanel = new JPanel();
-		dealerPanel = new JPanel();
-		shoePanel = new JPanel();
-		resultPanel = new JPanel();
-		houseBankPanel = new StackPanel(PURPLE);
-		middlePanel = new JPanel();
-		middlePanel.setBackground(SCARLET);
-		titleLabel1 = new JLabel();
-		titleLabel2 = new JLabel();
-		bottomPanel = new JPanel();
-		playerPanel = new PlayerPanel();
-		statsPanel = new JPanel();
-		playerBankPanel = new StackPanel(FELT_GREEN);
-		playerBetPanel = new StackPanel(GOLD);
-		playerWinningsPanel = new StackPanel(BLUE);
-		playerActiveChipsPanel = new JPanel();
-		continueButton = new JButton("Continue");
-		hitButton = new JButton("Hit");
-		standButton = new JButton("Stand");
-		splitButton = new JButton("Split");
-		doubleButton = new JButton("Double");
 	}
 
 	private void setupTitleLabel1() {
@@ -207,6 +184,32 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		bottomPanel.setPreferredSize(new Dimension(800, 300));
 	}
 
+	private void initializeComponents() {
+		topPanel = new JPanel();
+		dealerPanel = new JPanel();
+		shoePanel = new JPanel();
+
+		resultPanel = new JPanel();
+		houseBankPanel = new StackPanel(PURPLE);
+		middlePanel = new JPanel();
+		middlePanel.setBackground(SCARLET);
+		titleLabel1 = new JLabel();
+		titleLabel2 = new JLabel();
+		playerActiveChipsPanel = new JPanel();
+		playerWinningsPanel = new StackPanel(GOLD);
+		playerBetPanel = new StackPanel(BLUE);
+
+		bottomPanel = new JPanel();
+		playerPanel = new PlayerPanel();
+		statsPanel = new JPanel();
+		playerBankPanel = new StackPanel(Color.WHITE);
+		continueButton = new JButton("Continue");
+		hitButton = new JButton("Hit");
+		standButton = new JButton("Stand");
+		splitButton = new JButton("Split");
+		doubleButton = new JButton("Double");
+	}
+
 	private void addComponents() {
 		topPanel.add(dealerPanel);
 		shoePanel.add(new CardPanel());
@@ -221,6 +224,8 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		resultPanel.add(playerActiveChipsPanel);
 		middlePanel.add(resultPanel);
 
+		playerPanel.setBackground(FELT_GREEN);
+		playerPanel.setOpaque(true);
 		bottomPanel.add(playerPanel);
 
 		statsPanel.add(playerBankPanel);
@@ -229,6 +234,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		statsPanel.add(standButton);
 		statsPanel.add(splitButton);
 		statsPanel.add(doubleButton);
+		statsPanel.setBackground(FELT_GREEN);
 
 		bottomPanel.add(statsPanel);
 

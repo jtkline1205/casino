@@ -133,4 +133,59 @@ public class DecisionService {
 		}
 	}
 
+	// private Boolean runPlayerHitsOn16AndUnder(Hand playerHand, HandPanel
+	// playerHandPanel) throws InterruptedException {
+	// // ~40.93% win rate
+	// while (playerShouldHit16OrUnder(playerHand)) {
+	// drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
+	// if (playerHand.isBust()) {
+	// return false;
+	// }
+	// }
+	// return true;
+	// }
+	//
+	// private Boolean runPlayerHitsOn16AndUnderUnlessWeakDealer(Hand
+	// playerHand, HandPanel playerHandPanel,
+	// Card dealerUpCard) throws InterruptedException {
+	// // ~43.25% win rate
+	// while (playerShouldHit16OrUnderUnlessWeakDealer(playerHand,
+	// dealerUpCard)) {
+	// drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
+	// if (playerHand.isBust()) {
+	// return false;
+	// }
+	// }
+	// return true;
+	// }
+	//
+	// private boolean playerShouldHit16OrUnder(Hand playerHand) {
+	// return playerHand.calculateValue() < 17;
+	// }
+	//
+	// private boolean playerShouldHit16OrUnderUnlessWeakDealer(Hand playerHand,
+	// Card dealerUpCard) {
+	// if (dealerUpCard.getRank().getValue() < 7) {
+	// if (playerHand.calculateValue() < 12) {
+	// return true;
+	// } else if (playerHand.calculateValue() == 12) {
+	// return (dealerUpCard.getRank().getValue() == 2 ||
+	// dealerUpCard.getRank().getValue() == 3);
+	// }
+	// return false;
+	// } else {
+	// return (playerHand.calculateValue() < 17);
+	// }
+	// }
+
+	// private void drawCardAndUpdatePlayerHandPanel(Hand playerHand, HandPanel
+	// playerHandPanel)
+	// throws InterruptedException {
+	// log("Drawing card for Player.");
+	// Card newCard = shoe.drawCard();
+	// playerHand.addCard(newCard);
+	// playerHandPanel.add(new CardPanel(newCard));
+	// parent.packAndWait();
+	// }
+
 }

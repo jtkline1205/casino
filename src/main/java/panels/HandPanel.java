@@ -12,6 +12,12 @@ public class HandPanel extends JPanel {
 		setLayout(new GridLayout(1, 1));
 	}
 
+	public HandPanel(CardPanel cardPanel1) {
+		this.setBackground(BlackjackPanel.FELT_GREEN);
+		setLayout(new GridLayout(1, 1));
+		add(cardPanel1);
+	}
+
 	public HandPanel(CardPanel cardPanel1, CardPanel cardPanel2) {
 		this.setBackground(BlackjackPanel.FELT_GREEN);
 		setLayout(new GridLayout(1, 1));

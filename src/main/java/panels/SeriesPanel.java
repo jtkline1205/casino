@@ -30,9 +30,15 @@ public class SeriesPanel extends JPanel {
 
 	public void addHandPanel(HandPanel handPanel) {
 		this.handPanels.add(handPanel);
+		this.add(handPanel);
 	}
 
 	public void removeHandPanel(HandPanel handPanel) {
 		this.handPanels.remove(handPanel);
+		this.remove(handPanel);
+	}
+
+	public HandPanel getFirstHandPanel() {
+		return this.handPanels.get(0);
 	}
 }

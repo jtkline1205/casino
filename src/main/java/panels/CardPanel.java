@@ -16,9 +16,11 @@ public class CardPanel extends JPanel {
 
 	private BufferedImage image;
 
+	private Card card;
+
 	public CardPanel() {
 		try {
-			image = ImageIO.read(new File("src/main/resources/card_back.png"));
+			this.image = ImageIO.read(new File("src/main/resources/card_back.png"));
 			this.setBackground(BlackjackPanel.FELT_GREEN);
 		} catch (IOException ex) {
 			System.out.println("Could not find file.");
@@ -26,9 +28,21 @@ public class CardPanel extends JPanel {
 	}
 
 	public CardPanel(Card card) {
+		this.card = card;
 		try {
-			image = ImageIO.read(new File("src/main/resources/" + card.getResourceName() + ".png"));
+			this.image = ImageIO.read(new File("src/main/resources/" + this.card.getResourceName() + ".png"));
 			this.setBackground(BlackjackPanel.FELT_GREEN);
+		} catch (IOException ex) {
+			System.out.println("Could not find file.");
+		}
+	}
+
+	public void setCard(Card card) {
+		this.card = card;
+		try {
+			this.image = ImageIO.read(new File("src/main/resources/" + this.card.getResourceName() + ".png"));
+			this.setBackground(BlackjackPanel.FELT_GREEN);
+			this.repaint();
 		} catch (IOException ex) {
 			System.out.println("Could not find file.");
 		}

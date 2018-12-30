@@ -20,15 +20,13 @@ public class BlackjackGame extends JFrame {
 	private static final boolean INFO_ENABLED = true;
 	private static final boolean BUTTON_CONTROLLED = true;
 
-	private static final int DEAL_SPEED = 10;
-	private static final int DECKS_IN_SHOE = 1;
-	private static final int SHOE_CARD_LIMIT = 10;
+	private static final int DEAL_SPEED = 500;
+	private static final int DECKS_IN_SHOE = 4;
+	private static final int SHOE_CARD_LIMIT = 20;
 	private static final int PLAYER_BANKROLL_LIMIT = 10;
-	private static final int TOTAL_ROUNDS = 20;
+	private static final int TOTAL_ROUNDS = 10;
 
 	private static final String GAME_TITLE = "Blackjack";
-	private static final String[] WELCOME_MESSAGES = { "Welcome to Blackjack.", "Blackjacks Pay 3:2",
-			"Dealer Stands on All 17s", "Re-splitting Aces is not allowed" };
 
 	private Double playerBet = 10.00;
 	private Double playerBankroll = 200.00;
@@ -44,93 +42,89 @@ public class BlackjackGame extends JFrame {
 	public BlackjackGame() throws InterruptedException {
 		printWelcome();
 		initializeFrame();
-		int totalRounds = TOTAL_ROUNDS;
 
-		for (int i = 1; i <= totalRounds; i++) {
+		for (int i = 1; i <= TOTAL_ROUNDS; i++) {
 			log("Creating Shoe for Round " + i);
 			shoe = new Shoe(DECKS_IN_SHOE);
+			getContentPane().removeAll();
+			blackjackPanel = new BlackjackPanel();
+			add(blackjackPanel);
+			blackjackPanel.updatePlayerBankPanel(playerBankroll);
+			pack();
 			while (shoe.getNumberOfCardsInShoe() >= SHOE_CARD_LIMIT && playerBankroll >= PLAYER_BANKROLL_LIMIT) {
+				waitForBetInput();
+				getContentPane().removeAll();
+				blackjackPanel = new BlackjackPanel();
+				add(blackjackPanel);
+				blackjackPanel.updatePlayerBankPanel(playerBankroll);
+				blackjackPanel.disableBetButton();
+				blackjackPanel.enableDealButton();
+				pack();
 				Double bankrollChange = playAndResolveNewRound();
 				playerBankroll += bankrollChange;
 				blackjackPanel.updateResultPanel(bankrollChange);
 				if (bankrollChange < 0) {
 					blackjackPanel.updatePlayerBetPanel(0.00);
 				}
-				packAndWait();
+				blackjackPanel.enableBetButtonOnly();
+				pack();
 			}
 		}
+		info("Player Bankroll at end of session: " + playerBankroll);
 	}
 
-	public void packAndWait() throws InterruptedException {
-		pack();
-		blackjackWait();
-	}
-
-	private void printWelcome() {
-		for (String str : WELCOME_MESSAGES) {
-			info(str);
-		}
-	}
-
-	private void initializeFrame() {
-		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
-		setTitle(GAME_TITLE);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);
-	}
+	// public void packAndWait() throws InterruptedException {
+	// pack();
+	// blackjackWait();
+	// }
 
 	private Double playAndResolveNewRound() throws InterruptedException {
-		initializeNewBlackjackPanel();
+		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerBet);
+		blackjackPanel.updatePlayerBetPanel(playerBet);
 
-		Card playerCard1 = shoe.drawCard();
-		Card dealerUpCard = shoe.drawCard();
-		Card playerCard2 = shoe.drawCard();
-		Card dealerHoleCard = shoe.drawCard();
+		pack();
 
-		Hand playerHand = new Hand(playerCard1, playerCard2, playerBet);
-
-		CardPanel playerCard1Panel = new CardPanel(playerCard1);
-		CardPanel playerCard2Panel = new CardPanel(playerCard2);
-		CardPanel dealerUpCardPanel = new CardPanel(dealerUpCard);
-		CardPanel dealerHoleCardPanelFaceDown = new CardPanel();
+		CardPanel playerCard1Panel = new CardPanel();
+		CardPanel playerCard2Panel = new CardPanel();
+		CardPanel dealerUpCardPanel = new CardPanel();
+		CardPanel dealerHoleCardPanel = new CardPanel();
 
 		HandPanel playerHandPanel = new HandPanel(playerCard1Panel, playerCard2Panel);
 
 		SeriesPanel playerSeriesPanel = new SeriesPanel(playerHandPanel);
 
-		HandPanel dealerHandPanel = new HandPanel(dealerUpCardPanel, dealerHoleCardPanelFaceDown);
+		HandPanel dealerHandPanel = new HandPanel(dealerUpCardPanel, dealerHoleCardPanel);
 
-		blackjackPanel.updatePlayerBetPanel(playerHand.getBet());
 		blackjackPanel.getDealerPanel().add(dealerHandPanel);
 		blackjackPanel.getPlayerPanel().add(playerSeriesPanel);
 
-		playerCard1Panel.setVisible(false);
-		playerCard2Panel.setVisible(false);
-		dealerUpCardPanel.setVisible(false);
-		dealerHoleCardPanelFaceDown.setVisible(false);
+		waitForDealInput();
 
-		packAndWait();
+		Card playerCard1 = shoe.drawCard();
+		// Card playerCard1 = new Card(8);
+		Card dealerUpCard = shoe.drawCard();
+		// Card dealerUpCard = new Card(10);
+		Card playerCard2 = shoe.drawCard();
+		// Card playerCard2 = new Card(8);
+		Card dealerHoleCard = shoe.drawCard();
+		// Card dealerHoleCard = new Card(11);
 
-		playerCard1Panel.setVisible(true);
-		blackjackWait();
-		dealerUpCardPanel.setVisible(true);
-		blackjackWait();
-		playerCard2Panel.setVisible(true);
-		blackjackWait();
-		dealerHoleCardPanelFaceDown.setVisible(true);
-		blackjackWait();
+		Hand playerHand = new Hand(playerCard1, playerCard2, playerBet);
+
+		pack();
+
+		playerCard1Panel.setCard(playerCard1);
+		dealDelay();
+		dealerUpCardPanel.setCard(dealerUpCard);
+		dealDelay();
+		playerCard2Panel.setCard(playerCard2);
+		dealDelay();
 
 		Round round = new Round(new Series(playerHand), new Hand(dealerUpCard, dealerHoleCard), playerSeriesPanel,
-				dealerHandPanel, new CardPanel(dealerHoleCard), dealerHoleCardPanelFaceDown, blackjackPanel, this, shoe,
+				dealerHandPanel, new CardPanel(dealerHoleCard), dealerHoleCardPanel, blackjackPanel, this, shoe,
 				playerBankroll);
+		blackjackPanel.disableBetAndDealAndEnableDecisions(playerHand.isSplittable());
 		return round.play();
-	}
-
-	private void initializeNewBlackjackPanel() {
-		getContentPane().removeAll();
-		blackjackPanel = new BlackjackPanel();
-		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerBet);
-		add(blackjackPanel);
 	}
 
 	private void log(String string) {
@@ -145,15 +139,51 @@ public class BlackjackGame extends JFrame {
 		}
 	}
 
-	private void blackjackWait() throws InterruptedException {
-		if (BUTTON_CONTROLLED) {
-			while (!blackjackPanel.getContinueGame()) {
-				Thread.sleep(1);
-			}
-			blackjackPanel.setContinueGame(false);
-		} else {
-			Thread.sleep(DEAL_SPEED);
+	public void waitForBetInput() throws InterruptedException {
+		while (!blackjackPanel.getBetButtonPressed()) {
+			Thread.sleep(1);
 		}
+		blackjackPanel.setBetButtonPressed(false);
+	}
+
+	public void waitForDealInput() throws InterruptedException {
+		while (!blackjackPanel.getDealButtonPressed()) {
+			Thread.sleep(1);
+		}
+		blackjackPanel.setDealButtonPressed(false);
+	}
+
+	public void waitForHandDecision() throws InterruptedException {
+		while (!blackjackPanel.getHandDecisionPressed()) {
+			Thread.sleep(1);
+		}
+		blackjackPanel.setHandDecisionPressed(false);
+	}
+
+	public void dealDelay() throws InterruptedException {
+		Thread.sleep(DEAL_SPEED);
+	}
+
+	// private void blackjackWait() throws InterruptedException {
+	// if (BUTTON_CONTROLLED) {
+	// while (!blackjackPanel.getContinueGame()) {
+	// Thread.sleep(1);
+	// }
+	// blackjackPanel.setContinueGame(false);
+	// } else {
+	// Thread.sleep(DEAL_SPEED);
+	// }
+	// }
+
+	private void printWelcome() {
+		info("Welcome to Blackjack.");
+	}
+
+	private void initializeFrame() {
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
+		setTitle(GAME_TITLE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
 	}
 
 }

@@ -27,6 +27,10 @@ public class Series {
 		this.hands.remove(hand);
 	}
 
+	public Hand getFirstHand() {
+		return this.hands.get(0);
+	}
+
 	public Double getTotalBet() {
 		Double totalBet = 0.00;
 		for (Hand hand : hands) {

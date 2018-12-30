@@ -39,86 +39,92 @@ public class Round {
 
 	public Double play() throws InterruptedException {
 		log("----------------New Round----------------");
-		Hand playerFirstHand = playerSeries.getHands().get(0);
+		Hand playerFirstHand = playerSeries.getFirstHand();
 
-		log("Player's Starting Hand: ");
-		log(playerFirstHand.toString());
+		log("Player's Starting Hand: " + playerFirstHand);
 
-		boolean roundOver = false;
-		boolean holeCardRevealed = false;
+		// boolean roundOver = false;
 
 		// Phase 1: Check Blackjacks
 		if (playerFirstHand.isBlackjack()) {
-			log("Player's hand is a Blackjack!");
-			roundOver = true;
+			log("Player has Blackjack!");
 			if (!dealerHand.isBlackjack()) {
 				// Blackjack pays 3:2
 				double winnings = playerFirstHand.getBet() * 1.5;
 				log("Player wins " + winnings + " on the blackjack.");
 				dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
 				dealerHandPanel.add(dealerHoleCardPanelFaceUp);
-				holeCardRevealed = true;
+				return winnings;
+			} else {
+				// Blackjack pays even money against Dealer Blackjack (insurance
+				// not implemented)
+				double winnings = playerFirstHand.getBet();
+				log("Player wins " + winnings + " on the blackjack against dealer blackjack.");
+				dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
+				dealerHandPanel.add(dealerHoleCardPanelFaceUp);
 				return winnings;
 			}
 		}
 
 		if (dealerHand.isBlackjack()) {
-			log("Dealer has a Blackjack, the round is over.");
-			roundOver = true;
-			if (!playerFirstHand.isBlackjack()) {
-				double winnings = playerFirstHand.getBet() * -1;
-				log("Player lost " + (winnings * -1) + " due to dealer blackjack.");
-				dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
-				dealerHandPanel.add(dealerHoleCardPanelFaceUp);
-				holeCardRevealed = true;
-				return winnings;
-			}
+			log("Dealer has Blackjack and the round is over.");
+			// roundOver = true;
+			// if (!playerFirstHand.isBlackjack()) {
+			double winnings = playerFirstHand.getBet() * -1;
+			log("Player lost " + (winnings * -1) + " due to dealer blackjack.");
+			dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
+			dealerHandPanel.add(dealerHoleCardPanelFaceUp);
+			return winnings;
+			// }
 		}
 
 		Boolean dealerMustResolve = false;
 		// Phase 2: Player Round
-		if (!roundOver) {
-			log("Running player Series.");
-			dealerMustResolve = runPlayerSeries(playerSeries, dealerHand.getFirstCard(), playerSeriesPanel);
-		}
+		// if (!roundOver) {
+		log("Running player's first hand.");
+		HandPanel playerFirstHandPanel = playerSeriesPanel.getFirstHandPanel();
+		dealerMustResolve = runHandAndCheckDealerResolve(playerFirstHand, playerFirstHandPanel,
+				dealerHand.getFirstCard());
+		// }
 
 		// Phase 3: Dealer Round
-		if (!roundOver) {
-			if (dealerMustResolve) {
-				log("Running Dealer hand.");
-				dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
-				dealerHandPanel.add(dealerHoleCardPanelFaceUp);
-				holeCardRevealed = true;
-				runDealerRound(dealerHand, dealerHandPanel);
-			}
-		}
+		// if (!roundOver) {
+		dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
+		dealerHandPanel.add(dealerHoleCardPanelFaceUp);
 
-		// Phase 4: Analyze Player Hands
+		if (dealerMustResolve) {
+			log("Running Dealer hand.");
+			runDealerRound(dealerHand, dealerHandPanel);
+		}
+		// }
+
+		// if (!roundOver) {
+		return calculateWinnings();
+		// } else {
+		// return 0.0;
+		// }
+	}
+
+	private Double calculateWinnings() {
 		Double winnings = 0.0;
-		if (!roundOver) {
-			if (!holeCardRevealed) {
-				dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
-				dealerHandPanel.add(dealerHoleCardPanelFaceUp);
-			}
-			for (Hand hand : playerSeries.getHands()) {
-				if (hand.isBust()) {
-					log(hand + " LOST by busting and lost " + hand.getBet());
-					winnings -= hand.getBet();
+		for (Hand hand : playerSeries.getHands()) {
+			if (hand.isBust()) {
+				log(hand + " LOST by player bust and lost " + hand.getBet());
+				winnings -= hand.getBet();
+			} else {
+				if (dealerHand.isBust()) {
+					log(hand + " WON by dealer bust and won " + hand.getBet());
+					winnings += hand.getBet();
 				} else {
-					if (dealerHand.isBust()) {
-						log(hand + " WON due to dealer bust and won " + hand.getBet());
+					if (hand.calculateValue() > dealerHand.calculateValue()) {
+						log(hand + " WON by beating dealer and won " + hand.getBet());
 						winnings += hand.getBet();
-					} else {
-						if (hand.calculateValue() > dealerHand.calculateValue()) {
-							log(hand + " WON by beating the dealer's hand and won " + hand.getBet());
-							winnings += hand.getBet();
-						} else if (hand.calculateValue() < dealerHand.calculateValue()) {
-							log(hand + " LOST by losing to the dealer's hand and lost " + hand.getBet());
-							winnings -= hand.getBet();
-						} else if (hand.calculateValue() == dealerHand.calculateValue()) {
-							log(hand + " PUSHED by tying the dealer's hand");
-							winnings += 0.0;
-						}
+					} else if (hand.calculateValue() < dealerHand.calculateValue()) {
+						log(hand + " LOST to dealer and lost " + hand.getBet());
+						winnings -= hand.getBet();
+					} else if (hand.calculateValue() == dealerHand.calculateValue()) {
+						log(hand + " PUSHED by tying dealer");
+						winnings += 0.0;
 					}
 				}
 			}
@@ -126,170 +132,108 @@ public class Round {
 		return winnings;
 	}
 
-	private Boolean runPlayerHitsOn16AndUnder(Hand playerHand, HandPanel playerHandPanel) throws InterruptedException {
-		// ~40.93% win rate
-		while (playerShouldHit16OrUnder(playerHand)) {
-			drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
-			if (playerHand.isBust()) {
-				return false;
-			}
+	private Boolean runHandAndCheckDealerResolve(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
+			throws InterruptedException {
+		parent.waitForHandDecision();
+		Decision latestDecision = blackjackPanel.getLatestDecision();
+		if (latestDecision == null) {
+			// Basic Strategy Iteration 1
+			// ~42.30% win rate
+			log("Basic Strategy Decision chosen.");
+			latestDecision = decisionService.getBasicStrategyDecision(playerHand, dealerUpCard);
 		}
-		return true;
-	}
-
-	private Boolean runPlayerHitsOn16AndUnderUnlessWeakDealer(Hand playerHand, HandPanel playerHandPanel,
-			Card dealerUpCard) throws InterruptedException {
-		// ~43.25% win rate
-		while (playerShouldHit16OrUnderUnlessWeakDealer(playerHand, dealerUpCard)) {
-			drawCardAndUpdatePlayerHandPanel(playerHand, playerHandPanel);
-			if (playerHand.isBust()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean playerShouldHit16OrUnder(Hand playerHand) {
-		return playerHand.calculateValue() < 17;
-	}
-
-	private boolean playerShouldHit16OrUnderUnlessWeakDealer(Hand playerHand, Card dealerUpCard) {
-		if (dealerUpCard.getRank().getValue() < 7) {
-			if (playerHand.calculateValue() < 12) {
-				return true;
-			} else if (playerHand.calculateValue() == 12) {
-				return (dealerUpCard.getRank().getValue() == 2 || dealerUpCard.getRank().getValue() == 3);
-			}
-			return false;
+		log(playerHand + " Decision (Hit/Stand/Double/Split): " + latestDecision.getName());
+		if (latestDecision == Decision.STAND) {
+			return true;
+		} else if (latestDecision == Decision.DOUBLE) {
+			return doubleDownAndCheckDealerResolve(playerHand, playerHandPanel);
+		} else if (latestDecision == Decision.SPLIT) {
+			return splitAndCheckDealerResolve(playerHand, playerHandPanel, dealerUpCard);
 		} else {
-			return (playerHand.calculateValue() < 17);
+			return hitAndCheckDealerResolve(playerHand, playerHandPanel, dealerUpCard, latestDecision);
 		}
 	}
 
-	private void drawCardAndUpdatePlayerHandPanel(Hand playerHand, HandPanel playerHandPanel)
-			throws InterruptedException {
-		log("Drawing card for Player.");
-		Card newCard = shoe.drawCard();
-		playerHand.addCard(newCard);
-		playerHandPanel.add(new CardPanel(newCard));
-		parent.packAndWait();
+	private boolean hitAndCheckDealerResolve(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard,
+			Decision latestDecision) throws InterruptedException {
+		while (latestDecision == Decision.HIT) {
+			Card card = shoe.drawCard();
+			playerHand.addCard(card);
+			playerHandPanel.add(new CardPanel(card));
+			parent.pack();
+			if (playerHand.isBust()) {
+				return false;
+			}
+			blackjackPanel.enableHitStandAndBasicStrategyOnly();
+			parent.waitForHandDecision();
+			latestDecision = blackjackPanel.getLatestDecision();
+			if (latestDecision == null) {
+				log("Basic Strategy Decision chosen.");
+				latestDecision = decisionService.getBasicStrategyDecision(playerHand, dealerUpCard);
+			}
+			log(playerHand + " decision (Hit/Stand): " + latestDecision.getName());
+			if (latestDecision == Decision.STAND) {
+				return true;
+			}
+		}
+		return true;
 	}
 
-	private Boolean runPlayerSeries(Series playerSeries, Card dealerUpCard, SeriesPanel playerSeriesPanel)
+	private boolean doubleDownAndCheckDealerResolve(Hand playerHand, HandPanel playerHandPanel)
 			throws InterruptedException {
-		Hand playerFirstHand = playerSeries.getHands().get(0);
-		HandPanel playerFirstHandPanel = playerSeriesPanel.getHandPanels().get(0);
-
-		// return runPlayerHitsOn16AndUnder(playerFirstHand,
-		// playerFirstHandPanel);
-
-		// return runPlayerHitsOn16AndUnderUnlessWeakDealer(playerFirstHand,
-		// playerFirstHandPanel, dealerUpCard);
-
-		// Basic Strategy Iteration 1
-		// ~42.30% win rate
-
-		return runPlayerHand(playerFirstHand, playerFirstHandPanel, dealerUpCard);
-	}
-
-	private boolean runDoubleDecision(Hand playerHand, HandPanel playerHandPanel) throws InterruptedException {
 		blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet() + playerHand.getBet());
 		playerHand.doubleBet();
 		Card card = shoe.drawCard();
 		playerHand.addCard(card);
 		playerHandPanel.add(new CardPanel(card));
 		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
-		parent.packAndWait();
+		parent.pack();
+		if (playerHand.isBust()) {
+			return false;
+		}
 		return true;
 	}
 
-	private boolean runSplitDecision(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
+	private boolean splitAndCheckDealerResolve(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
 			throws InterruptedException {
+		blackjackPanel.disableBetAndDealAndEnableDecisions(false);
 		playerSeries.removeHand(playerHand);
 		playerSeriesPanel.removeHandPanel(playerHandPanel);
-		playerSeriesPanel.remove(playerHandPanel);
 
 		Card newCard1 = shoe.drawCard();
+
 		Hand newHand1 = new Hand(playerHand.getFirstCard(), newCard1, playerHand.getBet());
 		playerSeries.addHand(newHand1);
-
-		// Create child HandPanel 1 and add to SeriesPanel
-		CardPanel newCardPanel1 = new CardPanel(playerHand.getFirstCard());
-		CardPanel newCardPanel2 = new CardPanel(newCard1);
-		HandPanel newHandPanel1 = new HandPanel();
-		newHandPanel1.add(newCardPanel1);
-		newHandPanel1.add(newCardPanel2);
-		playerSeriesPanel.add(newHandPanel1);
+		HandPanel newHandPanel1 = new HandPanel(new CardPanel(playerHand.getFirstCard()), new CardPanel(newCard1));
 		playerSeriesPanel.addHandPanel(newHandPanel1);
 
-		// Create child Hand 2 and add to Series
 		Hand newHand2 = new Hand(playerHand.getSecondCard(), playerHand.getBet());
 		playerSeries.addHand(newHand2);
-
-		// Create child HandPanel 2 and add to SeriesPanel
-		CardPanel newCardPanel3 = new CardPanel(playerHand.getSecondCard());
-		HandPanel newHandPanel2 = new HandPanel();
-		newHandPanel2.add(newCardPanel3);
-		playerSeriesPanel.add(newHandPanel2);
+		HandPanel newHandPanel2 = new HandPanel(new CardPanel(playerHand.getSecondCard()));
 		playerSeriesPanel.addHandPanel(newHandPanel2);
 
 		blackjackPanel.updatePlayerBetPanel(playerSeries.getTotalBet());
 		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerSeries.getTotalBet());
 
-		// Repaint
-		parent.packAndWait();
+		parent.pack();
 
-		// Run child Hand 1 if first card was not an Ace
 		Boolean hand1NeedsResolution = true;
 		if (!newHand1.getFirstCard().getRank().equals(Rank.ACE)) {
-			hand1NeedsResolution = runPlayerHand(newHand1, newHandPanel1, dealerUpCard);
+			hand1NeedsResolution = runHandAndCheckDealerResolve(newHand1, newHandPanel1, dealerUpCard);
 		}
 
-		// Draw card for child Hand 2
 		Card newCard2 = shoe.drawCard();
 		newHand2.addCard(newCard2);
-		CardPanel newCardPanel4 = new CardPanel(newCard2);
-		newHandPanel2.add(newCardPanel4);
+		newHandPanel2.add(new CardPanel(newCard2));
 
-		// Repaint
-		parent.packAndWait();
+		parent.pack();
 
-		// Run child Hand 2 if first card was not an Ace
 		Boolean hand2NeedsResolution = true;
 		if (!newHand2.getFirstCard().getRank().equals(Rank.ACE)) {
-			hand2NeedsResolution = runPlayerHand(newHand2, newHandPanel2, dealerUpCard);
+			hand2NeedsResolution = runHandAndCheckDealerResolve(newHand2, newHandPanel2, dealerUpCard);
 		}
 
 		return hand1NeedsResolution || hand2NeedsResolution;
-	}
-
-	private Boolean runPlayerHand(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
-			throws InterruptedException {
-		Decision decision = blackjackPanel.getLatestDecision();
-		if (decision == null) {
-			decision = decisionService.getBasicStrategyDecision(playerHand, dealerUpCard);
-		}
-		log(playerHand + " decision: " + decision.getName());
-		if (decision == Decision.STAND) {
-			return true;
-		} else if (decision == Decision.DOUBLE) {
-			return runDoubleDecision(playerHand, playerHandPanel);
-		} else if (decision == Decision.SPLIT) {
-			return runSplitDecision(playerHand, playerHandPanel, dealerUpCard);
-		} else {
-			while (decision == Decision.HIT) {
-				log(playerHand + " decision: " + decision.getName());
-				Card card = shoe.drawCard();
-				playerHand.addCard(card);
-				playerHandPanel.add(new CardPanel(card));
-				parent.packAndWait();
-				if (playerHand.isBust()) {
-					return false;
-				}
-				decision = decisionService.getBasicStrategyDecision(playerHand, dealerUpCard);
-			}
-			return true;
-		}
 	}
 
 	private void runDealerRound(Hand dealerHand, HandPanel dealerHandPanel) throws InterruptedException {
@@ -297,9 +241,10 @@ public class Round {
 			Card card = shoe.drawCard();
 			dealerHand.addCard(card);
 			dealerHandPanel.add(new CardPanel(card));
-			parent.packAndWait();
+			parent.pack();
+			parent.dealDelay();
 		}
-		log("Dealer ended with this hand: " + dealerHand);
+		log("Dealer ended with: " + dealerHand);
 	}
 
 	private void log(String string) {

@@ -125,6 +125,10 @@ public class Hand {
 		return this.cards.size() == 2;
 	}
 
+	public boolean isSplittable() {
+		return (this.cards.size() == 2 && this.getFirstCard().getRank().equals(this.getSecondCard().getRank()));
+	}
+
 	public String toString() {
 		String returnString = "";
 		Integer handValue = calculateValue();
@@ -133,9 +137,13 @@ public class Hand {
 		}
 		returnString = returnString.substring(0, returnString.length() - 2);
 		if (handValue == 21 && this.isTwoCards()) {
-			returnString += " (Blackjack)";
+			returnString += " (Natural 21)";
 		} else {
-			returnString += " (" + (this.isSoft() ? "Soft " : "Hard ") + handValue + ")";
+			returnString += " (" + (this.isSoft() ? "Soft " : "Hard ") + handValue;
+			if (this.isSplittable()) {
+				returnString += ", Splittable";
+			}
+			returnString += ")";
 		}
 		return returnString;
 	}

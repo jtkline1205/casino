@@ -6,9 +6,10 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -39,25 +40,26 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	private StackPanel playerWinningsPanel;
 	private JPanel playerActiveChipsPanel;
 
-	private JButton betButton;
-	private JButton dealButton;
-	private JButton basicStrategyButton;
-	private JButton hitButton;
-	private JButton standButton;
-	private JButton splitButton;
-	private JButton doubleButton;
+	private BlackjackButton betButton;
+	private BlackjackButton dealButton;
+	private BlackjackButton basicStrategyButton;
+	private BlackjackButton hitButton;
+	private BlackjackButton standButton;
+	private BlackjackButton splitButton;
+	private BlackjackButton doubleButton;
+
+	private Map<String, BlackjackButton> buttonMap;
 
 	private Decision latestDecision;
-
-	private boolean dealButtonPressed = false;
-	private boolean betButtonPressed = false;
-	private boolean handDecisionPressed = false;
 
 	public static final Color FELT_GREEN = new Color(0, 100, 0);
 	private final Color GOLD = new Color(182, 182, 29);
 	private final Color PURPLE = new Color(177, 82, 182);
 	private final Color BLUE = new Color(117, 166, 255);
 	private final Color SCARLET = new Color(211, 20, 43);
+
+	private final String[] buttonNames = new String[] { "Bet", "Deal", "Basic Strategy", "Hit", "Stand", "Double",
+			"Split" };
 
 	public BlackjackPanel() {
 		initializeComponents();
@@ -75,93 +77,50 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	}
 
 	private void addActionListeners() {
-		betButton.addActionListener(this);
-		dealButton.addActionListener(this);
-		basicStrategyButton.addActionListener(this);
-		hitButton.addActionListener(this);
-		standButton.addActionListener(this);
-		splitButton.addActionListener(this);
-		doubleButton.addActionListener(this);
+		for (BlackjackButton button : buttonMap.values()) {
+			button.addActionListener(this);
+		}
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		switch (((JButton) ae.getSource()).getText()) {
-		case "Bet":
-			betButtonPressed = true;
-			break;
-		case "Deal":
-			dealButtonPressed = true;
-			break;
-		case "Basic Strategy":
-			latestDecision = null;
-			handDecisionPressed = true;
-			break;
-		case "Hit":
-			latestDecision = Decision.HIT;
-			handDecisionPressed = true;
-			break;
-		case "Stand":
-			latestDecision = Decision.STAND;
-			handDecisionPressed = true;
-			break;
-		case "Split":
-			latestDecision = Decision.SPLIT;
-			handDecisionPressed = true;
-			break;
-		case "Double":
-			latestDecision = Decision.DOUBLE;
-			handDecisionPressed = true;
-			break;
-		}
+		BlackjackButton button = ((BlackjackButton) ae.getSource());
+		button.setPressed(true);
+		latestDecision = button.getAssociatedDecision();
 	}
 
-	public JPanel getDealerPanel() {
-		return dealerPanel;
+	public void addDealerHandPanel(HandPanel dealerHandPanel) {
+		this.dealerPanel.add(dealerHandPanel);
 	}
 
-	public PlayerPanel getPlayerPanel() {
-		return playerPanel;
+	public void addPlayerSeriesPanel(SeriesPanel playerSeriesPanel) {
+		this.playerPanel.add(playerSeriesPanel);
 	}
-
-	// public boolean getContinueGame() {
-	// return continueGame;
-	// }
-	//
-	// public void setContinueGame(boolean continueGame) {
-	// this.continueGame = continueGame;
-	// }
 
 	public void updatePlayerBankPanel(Double bankroll) {
 		statsPanel.remove(playerBankPanel);
-		Stack newStack = new Stack(bankroll);
-		playerBankPanel = new StackPanel(newStack, FELT_GREEN);
+		playerBankPanel = new StackPanel(new Stack(bankroll), FELT_GREEN);
 		statsPanel.add(playerBankPanel);
 	}
 
 	public void updatePlayerBetPanel(Double playerBet) {
 		playerActiveChipsPanel.remove(playerBetPanel);
 		playerActiveChipsPanel.remove(playerWinningsPanel);
-
 		playerBetPanel = new StackPanel(new Stack(playerBet), BLUE);
-
 		playerActiveChipsPanel.add(playerBetPanel);
 		playerActiveChipsPanel.add(playerWinningsPanel);
 	}
 
 	public void updateResultPanel(Double doubleValue) {
-		Stack resultStack = null;
 		resultPanel.remove(houseBankPanel);
-		resultPanel.remove(playerActiveChipsPanel);
 		playerActiveChipsPanel.remove(playerBetPanel);
 		playerActiveChipsPanel.remove(playerWinningsPanel);
+		resultPanel.remove(playerActiveChipsPanel);
 
 		if (doubleValue < 0) {
-			resultStack = new Stack(-1 * doubleValue);
-			houseBankPanel = new StackPanel(resultStack, PURPLE);
+			houseBankPanel = new StackPanel(new Stack(doubleValue), PURPLE);
 		} else if (doubleValue > 0) {
-			resultStack = new Stack(doubleValue);
-			playerWinningsPanel = new StackPanel(resultStack, GOLD);
+			playerWinningsPanel = new StackPanel(new Stack(doubleValue), GOLD);
 		}
 
 		resultPanel.add(houseBankPanel);
@@ -205,6 +164,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	private void initializeComponents() {
 		topPanel = new JPanel();
 		dealerPanel = new JPanel();
+		dealerPanel.setBackground(FELT_GREEN);
 		shoePanel = new JPanel();
 
 		resultPanel = new JPanel();
@@ -226,21 +186,15 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	}
 
 	private void initializeButtons() {
-		betButton = new JButton("Bet");
-		dealButton = new JButton("Deal");
-		basicStrategyButton = new JButton("Basic Strategy");
-		hitButton = new JButton("Hit");
-		standButton = new JButton("Stand");
-		splitButton = new JButton("Split");
-		doubleButton = new JButton("Double");
-
-		dealButton.setEnabled(false);
-		basicStrategyButton.setEnabled(false);
-		hitButton.setEnabled(false);
-		standButton.setEnabled(false);
-		splitButton.setEnabled(false);
-		doubleButton.setEnabled(false);
-
+		buttonMap = new HashMap<String, BlackjackButton>();
+		int order = 0;
+		for (String buttonName : buttonNames) {
+			BlackjackButton button = new BlackjackButton(buttonName, order);
+			button.setEnabled(false);
+			buttonMap.put(buttonName, button);
+			order++;
+		}
+		buttonMap.get("Bet").setEnabled(true);
 	}
 
 	private void addComponents() {
@@ -263,13 +217,16 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		bottomPanel.add(playerPanel);
 
 		statsPanel.add(playerBankPanel);
-		statsPanel.add(betButton);
-		statsPanel.add(dealButton);
-		statsPanel.add(basicStrategyButton);
-		statsPanel.add(hitButton);
-		statsPanel.add(standButton);
-		statsPanel.add(splitButton);
-		statsPanel.add(doubleButton);
+
+		int counter = 0;
+		while (counter < buttonNames.length) {
+			for (BlackjackButton button : buttonMap.values()) {
+				if (button.getOrder() == counter) {
+					statsPanel.add(button);
+					counter++;
+				}
+			}
+		}
 		statsPanel.setBackground(FELT_GREEN);
 
 		bottomPanel.add(statsPanel);
@@ -280,66 +237,81 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	}
 
 	public boolean getDealButtonPressed() {
-		return dealButtonPressed;
+		return this.buttonMap.get("Deal").getPressed();
 	}
 
 	public void setDealButtonPressed(boolean dealButtonPressed) {
-		this.dealButtonPressed = dealButtonPressed;
+		this.buttonMap.get("Deal").setPressed(dealButtonPressed);
 	}
 
 	public boolean getBetButtonPressed() {
-		return betButtonPressed;
+		return this.buttonMap.get("Bet").getPressed();
 	}
 
 	public void setBetButtonPressed(boolean betButtonPressed) {
-		this.betButtonPressed = betButtonPressed;
+		this.buttonMap.get("Bet").setPressed(betButtonPressed);
 	}
 
 	public boolean getHandDecisionPressed() {
-		return handDecisionPressed;
+		for (String buttonName : buttonNames) {
+			if (!buttonName.equals("Bet") && !buttonName.equals("Deal")) {
+				if (this.buttonMap.get(buttonName).getPressed()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
-	public void setHandDecisionPressed(boolean handDecisionPressed) {
-		this.handDecisionPressed = handDecisionPressed;
+	public void unpressAllDecisions() {
+		for (String buttonName : buttonNames) {
+			if (!buttonName.equals("Bet") && !buttonName.equals("Deal")) {
+				this.buttonMap.get(buttonName).setPressed(false);
+			}
+		}
 	}
 
 	public void disableBetAndDealAndEnableDecisions(boolean splitEnabled) {
-		betButton.setEnabled(false);
-		dealButton.setEnabled(false);
-		basicStrategyButton.setEnabled(true);
-		hitButton.setEnabled(true);
-		standButton.setEnabled(true);
-		splitButton.setEnabled(splitEnabled);
-		doubleButton.setEnabled(true);
+		for (BlackjackButton button : buttonMap.values()) {
+			if (button.getButtonName().equals("Bet") || button.getButtonName().equals("Deal")) {
+				button.setEnabled(false);
+			} else {
+				if (button.getButtonName().equals("Split")) {
+					button.setEnabled(splitEnabled);
+				} else {
+					button.setEnabled(true);
+				}
+			}
+		}
 	}
 
 	public void disableBetButton() {
-		betButton.setEnabled(false);
+		buttonMap.get("Bet").setEnabled(false);
 	}
 
 	public void enableHitStandAndBasicStrategyOnly() {
-		hitButton.setEnabled(true);
-		standButton.setEnabled(true);
-		basicStrategyButton.setEnabled(true);
-
-		betButton.setEnabled(false);
-		dealButton.setEnabled(false);
-		splitButton.setEnabled(false);
-		doubleButton.setEnabled(false);
+		for (BlackjackButton button : buttonMap.values()) {
+			if (button.getButtonName().equals("Hit") || button.getButtonName().equals("Stand")
+					|| button.getButtonName().equals("Basic Strategy")) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
+			}
+		}
 	}
 
 	public void enableBetButtonOnly() {
-		betButton.setEnabled(true);
-		dealButton.setEnabled(false);
-		basicStrategyButton.setEnabled(false);
-		hitButton.setEnabled(false);
-		standButton.setEnabled(false);
-		splitButton.setEnabled(false);
-		doubleButton.setEnabled(false);
+		for (BlackjackButton button : buttonMap.values()) {
+			if (button.getButtonName().equals("Bet")) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
+			}
+		}
 	}
 
 	public void enableDealButton() {
-		dealButton.setEnabled(true);
+		buttonMap.get("Deal").setEnabled(true);
 	}
 
 }

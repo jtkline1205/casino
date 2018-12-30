@@ -20,7 +20,7 @@ public class BlackjackGame extends JFrame {
 	private static final boolean INFO_ENABLED = true;
 	private static final boolean BUTTON_CONTROLLED = true;
 
-	private static final int DEAL_SPEED = 500;
+	private static final int DEAL_SPEED = 50;
 	private static final int DECKS_IN_SHOE = 4;
 	private static final int SHOE_CARD_LIMIT = 20;
 	private static final int PLAYER_BANKROLL_LIMIT = 10;
@@ -46,17 +46,10 @@ public class BlackjackGame extends JFrame {
 		for (int i = 1; i <= TOTAL_ROUNDS; i++) {
 			log("Creating Shoe for Round " + i);
 			shoe = new Shoe(DECKS_IN_SHOE);
-			getContentPane().removeAll();
-			blackjackPanel = new BlackjackPanel();
-			add(blackjackPanel);
-			blackjackPanel.updatePlayerBankPanel(playerBankroll);
-			pack();
+			resetBlackjackPanel();
 			while (shoe.getNumberOfCardsInShoe() >= SHOE_CARD_LIMIT && playerBankroll >= PLAYER_BANKROLL_LIMIT) {
 				waitForBetInput();
-				getContentPane().removeAll();
-				blackjackPanel = new BlackjackPanel();
-				add(blackjackPanel);
-				blackjackPanel.updatePlayerBankPanel(playerBankroll);
+				resetBlackjackPanel();
 				blackjackPanel.disableBetButton();
 				blackjackPanel.enableDealButton();
 				pack();
@@ -73,10 +66,13 @@ public class BlackjackGame extends JFrame {
 		info("Player Bankroll at end of session: " + playerBankroll);
 	}
 
-	// public void packAndWait() throws InterruptedException {
-	// pack();
-	// blackjackWait();
-	// }
+	private void resetBlackjackPanel() {
+		getContentPane().removeAll();
+		blackjackPanel = new BlackjackPanel();
+		add(blackjackPanel);
+		blackjackPanel.updatePlayerBankPanel(playerBankroll);
+		pack();
+	}
 
 	private Double playAndResolveNewRound() throws InterruptedException {
 		blackjackPanel.updatePlayerBankPanel(playerBankroll - playerBet);
@@ -95,8 +91,8 @@ public class BlackjackGame extends JFrame {
 
 		HandPanel dealerHandPanel = new HandPanel(dealerUpCardPanel, dealerHoleCardPanel);
 
-		blackjackPanel.getDealerPanel().add(dealerHandPanel);
-		blackjackPanel.getPlayerPanel().add(playerSeriesPanel);
+		blackjackPanel.addDealerHandPanel(dealerHandPanel);
+		blackjackPanel.addPlayerSeriesPanel(playerSeriesPanel);
 
 		waitForDealInput();
 
@@ -157,23 +153,12 @@ public class BlackjackGame extends JFrame {
 		while (!blackjackPanel.getHandDecisionPressed()) {
 			Thread.sleep(1);
 		}
-		blackjackPanel.setHandDecisionPressed(false);
+		blackjackPanel.unpressAllDecisions();
 	}
 
 	public void dealDelay() throws InterruptedException {
 		Thread.sleep(DEAL_SPEED);
 	}
-
-	// private void blackjackWait() throws InterruptedException {
-	// if (BUTTON_CONTROLLED) {
-	// while (!blackjackPanel.getContinueGame()) {
-	// Thread.sleep(1);
-	// }
-	// blackjackPanel.setContinueGame(false);
-	// } else {
-	// Thread.sleep(DEAL_SPEED);
-	// }
-	// }
 
 	private void printWelcome() {
 		info("Welcome to Blackjack.");

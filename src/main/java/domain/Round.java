@@ -136,7 +136,7 @@ public class Round {
 			throws InterruptedException {
 		parent.waitForHandDecision();
 		Decision latestDecision = blackjackPanel.getLatestDecision();
-		if (latestDecision == null) {
+		if (latestDecision == Decision.BASIC_STRATEGY) {
 			// Basic Strategy Iteration 1
 			// ~42.30% win rate
 			log("Basic Strategy Decision chosen.");

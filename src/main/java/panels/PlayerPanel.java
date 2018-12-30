@@ -13,10 +13,4 @@ public class PlayerPanel extends JPanel {
 		this.setBackground(BlackjackPanel.FELT_GREEN);
 	}
 
-	// @Override
-	// protected void paintComponent(Graphics g) {
-	// super.paintComponent(g);
-	// // g.drawImage(image, 0, 0, null); // see javadoc for more info on the
-	// // parameters
-	// }
 }

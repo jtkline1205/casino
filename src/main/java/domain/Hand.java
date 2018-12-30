@@ -126,7 +126,7 @@ public class Hand {
 	}
 
 	public boolean isSplittable() {
-		return (this.cards.size() == 2 && this.getFirstCard().getRank().equals(this.getSecondCard().getRank()));
+		return (this.cards.size() == 2 && this.getFirstCard().getValue() == this.getSecondCard().getValue());
 	}
 
 	public String toString() {

@@ -12,6 +12,7 @@ public class Stack {
 	}
 
 	public Stack(Double remainingValue) {
+		remainingValue = Math.abs(remainingValue);
 		this.chips = new ArrayList<Chip>();
 		remainingValue = addChips(Denomination.FIVE_HUNDRED, remainingValue);
 		remainingValue = addChips(Denomination.HUNDRED, remainingValue);

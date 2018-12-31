@@ -1,8 +1,8 @@
 package domain;
 
 public enum Decision {
-	BET("Bet"), DEAL("Deal"), BASIC_STRATEGY("Basic Strategy"), HIT("Hit"), STAND("Stand"), SPLIT("Split"), DOUBLE(
-			"Double");
+	BET("Bet"), DEAL("Deal"), BASIC_STRATEGY("Basic Strategy"), HIT("Hit"), STAND("Stand"), DOUBLE("Double"), SPLIT(
+			"Split");
 
 	private String name;
 

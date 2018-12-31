@@ -4,22 +4,20 @@ import javax.swing.JButton;
 
 import domain.Decision;
 
-public class BlackjackButton extends JButton {
-	private String buttonName;
+public class DecisionButton extends JButton {
 	private int order;
 	private boolean pressed;
 	private Decision associatedDecision;
 
-	public BlackjackButton(String buttonName, int order) {
-		this.buttonName = buttonName;
-		this.setText(buttonName);
+	public DecisionButton(Decision decision, int order) {
+		this.setText(decision.getName());
 		this.order = order;
 		this.pressed = false;
-		this.associatedDecision = Decision.getDecisionFromName(buttonName);
+		this.associatedDecision = decision;
 	}
 
 	public String getButtonName() {
-		return this.buttonName;
+		return this.associatedDecision.getName();
 	}
 
 	public int getOrder() {

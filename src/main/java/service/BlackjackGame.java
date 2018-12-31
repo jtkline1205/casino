@@ -21,14 +21,14 @@ public class BlackjackGame extends JFrame {
 	private static final boolean BUTTON_CONTROLLED = true;
 
 	private static final int DEAL_SPEED = 50;
-	private static final int DECKS_IN_SHOE = 4;
+	private static final int DECKS_IN_SHOE = 2;
 	private static final int SHOE_CARD_LIMIT = 20;
 	private static final int PLAYER_BANKROLL_LIMIT = 10;
-	private static final int TOTAL_ROUNDS = 10;
+	private static final int TOTAL_ROUNDS = 1;
 
 	private static final String GAME_TITLE = "Blackjack";
 
-	private Double playerBet = 10.00;
+	private Double playerBet = 0.00;
 	private Double playerBankroll = 200.00;
 
 	private Shoe shoe;
@@ -46,31 +46,34 @@ public class BlackjackGame extends JFrame {
 		for (int i = 1; i <= TOTAL_ROUNDS; i++) {
 			log("Creating Shoe for Round " + i);
 			shoe = new Shoe(DECKS_IN_SHOE);
-			resetBlackjackPanel();
+			resetBlackjackPanel(false);
 			while (shoe.getNumberOfCardsInShoe() >= SHOE_CARD_LIMIT && playerBankroll >= PLAYER_BANKROLL_LIMIT) {
+				playerBet = 0.0;
+				blackjackPanel.setEnabledAllChipButtons(true);
 				waitForBetInput();
-				resetBlackjackPanel();
-				blackjackPanel.disableBetButton();
-				blackjackPanel.enableDealButton();
-				pack();
+				resetBlackjackPanel(true);
 				Double bankrollChange = playAndResolveNewRound();
 				playerBankroll += bankrollChange;
 				blackjackPanel.updateResultPanel(bankrollChange);
-				if (bankrollChange < 0) {
-					blackjackPanel.updatePlayerBetPanel(0.00);
-				}
-				blackjackPanel.enableBetButtonOnly();
 				pack();
 			}
 		}
 		info("Player Bankroll at end of session: " + playerBankroll);
 	}
 
-	private void resetBlackjackPanel() {
+	private void resetBlackjackPanel(boolean afterBet) {
 		getContentPane().removeAll();
 		blackjackPanel = new BlackjackPanel();
 		add(blackjackPanel);
 		blackjackPanel.updatePlayerBankPanel(playerBankroll);
+		blackjackPanel.updatePlayerBetPanel(playerBet);
+		if (afterBet) {
+			blackjackPanel.disableBetButton();
+			blackjackPanel.setEnabledAllChipButtons(false);
+			blackjackPanel.enableDealButton();
+		} else {
+			blackjackPanel.setEnabledAllChipButtons(true);
+		}
 		pack();
 	}
 
@@ -138,6 +141,15 @@ public class BlackjackGame extends JFrame {
 	public void waitForBetInput() throws InterruptedException {
 		while (!blackjackPanel.getBetButtonPressed()) {
 			Thread.sleep(1);
+			if (blackjackPanel.getLatestIncrement() != null) {
+				playerBet += blackjackPanel.getLatestIncrement().getValue();
+				blackjackPanel.resetLatestIncrement();
+				blackjackPanel.updatePlayerBankPanel(playerBankroll - playerBet);
+				blackjackPanel.updatePlayerBetPanel(playerBet);
+				blackjackPanel.clearPlayerWinningsPanel();
+				blackjackPanel.clearHouseBankPanel();
+				pack();
+			}
 		}
 		blackjackPanel.setBetButtonPressed(false);
 	}

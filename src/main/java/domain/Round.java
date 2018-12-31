@@ -69,13 +69,12 @@ public class Round {
 			log("Player lost " + (winnings * -1) + " due to dealer blackjack.");
 			dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
 			dealerHandPanel.add(dealerHoleCardPanelFaceUp);
+			parent.pack();
 			return winnings;
 		}
 
-		Boolean dealerMustResolve = false;
 		log("Running player's first hand.");
-		HandPanel playerFirstHandPanel = playerSeriesPanel.getFirstHandPanel();
-		dealerMustResolve = runHandAndCheckDealerResolve(playerFirstHand, playerFirstHandPanel,
+		boolean dealerMustResolve = runHandAndCheckDealerResolve(playerFirstHand, playerSeriesPanel.getFirstHandPanel(),
 				dealerHand.getFirstCard());
 
 		dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
@@ -145,7 +144,7 @@ public class Round {
 			playerHand.addCard(card);
 			playerHandPanel.add(new CardPanel(card));
 			parent.pack();
-			if (playerHand.isBust()) {
+			if (playerHand.isBust() || playerHand.calculateValue() == 21) {
 				return false;
 			}
 			blackjackPanel.enableHitStandAndBasicStrategyOnly();

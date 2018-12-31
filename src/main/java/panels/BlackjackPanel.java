@@ -33,7 +33,6 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	private JLabel titleLabel1;
 	private JLabel titleLabel2;
 	private JLabel titleLabel3;
-	private JLabel titleLabel4;
 
 	private JPanel bottomPanel;
 	private PlayerPanel playerPanel;
@@ -63,7 +62,6 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		titleLabel1 = setupTitleLabel("BLACKJACK PAYS 3:2", Font.BOLD);
 		titleLabel2 = setupTitleLabel("Dealer must draw to 16 and stand on all 17s", Font.ITALIC);
 		titleLabel3 = setupTitleLabel("Aces can be split once with one card dealt to each", Font.ITALIC);
-		titleLabel4 = setupTitleLabel("Minimum bet: $5  Maximum bet: $500", Font.ITALIC);
 		addActionListeners();
 		setLayouts();
 		setPreferredSizes();
@@ -137,20 +135,9 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 
 	public void clearHouseBankPanel() {
 		resultPanel.remove(houseBankPanel);
-		// playerActiveChipsPanel.remove(playerBetPanel);
-		// playerActiveChipsPanel.remove(playerWinningsPanel);
 		resultPanel.remove(playerActiveChipsPanel);
-
-		// if (doubleValue < 0) {
 		houseBankPanel = new StackPanel(PURPLE);
-		// updatePlayerBetPanel(0.00);
-		// } else if (doubleValue > 0) {
-		// playerWinningsPanel = new StackPanel(new Stack(doubleValue), GOLD);
-		// }
-
 		resultPanel.add(houseBankPanel);
-		// playerActiveChipsPanel.add(playerBetPanel);
-		// playerActiveChipsPanel.add(playerWinningsPanel);
 		resultPanel.add(playerActiveChipsPanel);
 	}
 
@@ -171,7 +158,6 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		playerActiveChipsPanel.add(playerBetPanel);
 		playerActiveChipsPanel.add(playerWinningsPanel);
 		resultPanel.add(playerActiveChipsPanel);
-		enableBetButtonOnly();
 	}
 
 	private JLabel setupTitleLabel(String text, int fontType) {
@@ -190,14 +176,14 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		dealerPanel.setLayout(new GridLayout(1, 1));
 		shoePanel.setLayout(new GridLayout(1, 1));
 
-		middlePanel.setLayout(new GridLayout(5, 1));
+		middlePanel.setLayout(new GridLayout(4, 1));
 		resultPanel.setLayout(new GridLayout(2, 1));
 		playerActiveChipsPanel.setLayout(new GridLayout(1, 2));
 
 		bottomPanel.setLayout(new GridLayout(2, 1));
 		playerPanel.setLayout(new GridLayout(1, 1));
 		playerAndControlPanel.setLayout(new GridLayout(1, 2));
-		chipButtonPanel.setLayout(new GridLayout(6, 1));
+		chipButtonPanel.setLayout(new GridLayout(1, 6));
 		decisionButtonPanel.setLayout(new GridLayout(6, 1));
 		controlPanel.setLayout(new GridLayout(1, 2));
 	}
@@ -227,7 +213,6 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		titleLabel1 = new JLabel();
 		titleLabel2 = new JLabel();
 		titleLabel3 = new JLabel();
-		titleLabel4 = new JLabel();
 		playerActiveChipsPanel = new JPanel();
 
 		bottomPanel = new JPanel();
@@ -262,7 +247,6 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 			decisionButtonMap.put(decision, button);
 			order++;
 		}
-		decisionButtonMap.get(Decision.BET).setEnabled(true);
 	}
 
 	private void addComponents() {
@@ -273,7 +257,6 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		middlePanel.add(titleLabel1);
 		middlePanel.add(titleLabel2);
 		middlePanel.add(titleLabel3);
-		middlePanel.add(titleLabel4);
 
 		resultPanel.add(houseBankPanel);
 		playerActiveChipsPanel.add(playerBetPanel);
@@ -394,6 +377,12 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 	public void disableChipButtons() {
 		for (ChipButton chipButton : chipButtonMap.values()) {
 			chipButton.setEnabled(false);
+		}
+	}
+
+	public void disableAllDecisionButtons() {
+		for (DecisionButton button : decisionButtonMap.values()) {
+			button.setEnabled(false);
 		}
 	}
 }

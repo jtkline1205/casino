@@ -1,5 +1,11 @@
 package panels;
 
+import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import domain.Denomination;
@@ -10,7 +16,14 @@ public class ChipButton extends JButton {
 	private Denomination associatedDenomination;
 
 	public ChipButton(Denomination denomination, int order) {
-		this.setText("" + denomination.getValue());
+		try {
+			Image image = ImageIO.read(new File("src/main/resources/" + denomination.getColor() + "chip.png"));
+			ImageIcon icon = new ImageIcon(image);
+			this.setIcon(icon);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		this.order = order;
 		this.pressed = false;
 		this.associatedDenomination = denomination;

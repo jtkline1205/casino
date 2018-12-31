@@ -29,7 +29,7 @@ public class BlackjackGame extends JFrame {
 	private static final String GAME_TITLE = "Blackjack";
 
 	private Double playerBet = 0.00;
-	private Double playerBankroll = 200.00;
+	private Double playerBankroll = 300.00;
 
 	private Shoe shoe;
 
@@ -140,6 +140,11 @@ public class BlackjackGame extends JFrame {
 	public void waitForBetInput() throws InterruptedException {
 		while (!blackjackPanel.getBetButtonPressed()) {
 			Thread.sleep(1);
+			if (playerBet > 0) {
+				blackjackPanel.enableBetButtonOnly();
+			} else {
+				blackjackPanel.disableAllDecisionButtons();
+			}
 			if (blackjackPanel.getLatestIncrement() != null) {
 				playerBet += blackjackPanel.getLatestIncrement().getValue();
 				blackjackPanel.resetLatestIncrement();

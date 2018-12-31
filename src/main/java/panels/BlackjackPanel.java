@@ -198,7 +198,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		playerPanel.setLayout(new GridLayout(1, 1));
 		playerAndControlPanel.setLayout(new GridLayout(1, 2));
 		chipButtonPanel.setLayout(new GridLayout(6, 1));
-		decisionButtonPanel.setLayout(new GridLayout(7, 1));
+		decisionButtonPanel.setLayout(new GridLayout(6, 1));
 		controlPanel.setLayout(new GridLayout(1, 2));
 	}
 
@@ -318,14 +318,6 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		this.add(bottomPanel);
 	}
 
-	public boolean getDealButtonPressed() {
-		return this.decisionButtonMap.get(Decision.DEAL).getPressed();
-	}
-
-	public void setDealButtonPressed(boolean dealButtonPressed) {
-		this.decisionButtonMap.get(Decision.DEAL).setPressed(dealButtonPressed);
-	}
-
 	public boolean getBetButtonPressed() {
 		return this.decisionButtonMap.get(Decision.BET).getPressed();
 	}
@@ -336,7 +328,7 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 
 	public boolean getHandDecisionPressed() {
 		for (Decision decision : Decision.values()) {
-			if (!decision.equals(Decision.BET) && !decision.equals(Decision.DEAL)) {
+			if (!decision.equals(Decision.BET)) {
 				if (this.decisionButtonMap.get(decision).getPressed()) {
 					return true;
 				}
@@ -347,23 +339,22 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 
 	public void unpressAllDecisions() {
 		for (Decision decision : Decision.values()) {
-			if (!decision.equals(Decision.BET) && !decision.equals(Decision.DEAL)) {
+			if (!decision.equals(Decision.BET)) {
 				this.decisionButtonMap.get(decision).setPressed(false);
 			}
 		}
 	}
 
-	public void disableBetAndDealAndEnableDecisions(boolean splitEnabled) {
+	public void disableBetAndDealAndEnableDecisions(boolean canAffordToDouble, boolean splitEnabled) {
 		for (DecisionButton button : decisionButtonMap.values()) {
-			if (button.getAssociatedDecision().equals(Decision.BET)
-					|| button.getAssociatedDecision().equals(Decision.DEAL)) {
+			if (button.getAssociatedDecision().equals(Decision.BET)) {
 				button.setEnabled(false);
+			} else if (button.getAssociatedDecision().equals(Decision.SPLIT)) {
+				button.setEnabled(splitEnabled);
+			} else if (button.getAssociatedDecision().equals(Decision.DOUBLE)) {
+				button.setEnabled(canAffordToDouble);
 			} else {
-				if (button.getAssociatedDecision().equals(Decision.SPLIT)) {
-					button.setEnabled(splitEnabled);
-				} else {
-					button.setEnabled(true);
-				}
+				button.setEnabled(true);
 			}
 		}
 	}
@@ -394,13 +385,15 @@ public class BlackjackPanel extends JPanel implements ActionListener {
 		}
 	}
 
-	public void enableDealButton() {
-		decisionButtonMap.get(Decision.DEAL).setEnabled(true);
+	public void enableChipButtons(double playerBankroll) {
+		for (ChipButton chipButton : chipButtonMap.values()) {
+			chipButton.setEnabled(chipButton.getAssociatedDenomination().getValue() <= playerBankroll ? true : false);
+		}
 	}
 
-	public void setEnabledAllChipButtons(boolean enabled) {
+	public void disableChipButtons() {
 		for (ChipButton chipButton : chipButtonMap.values()) {
-			chipButton.setEnabled(enabled);
+			chipButton.setEnabled(false);
 		}
 	}
 }

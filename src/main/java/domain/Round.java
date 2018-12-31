@@ -43,9 +43,6 @@ public class Round {
 
 		log("Player's Starting Hand: " + playerFirstHand);
 
-		// boolean roundOver = false;
-
-		// Phase 1: Check Blackjacks
 		if (playerFirstHand.isBlackjack()) {
 			log("Player has Blackjack!");
 			if (!dealerHand.isBlackjack()) {
@@ -68,27 +65,19 @@ public class Round {
 
 		if (dealerHand.isBlackjack()) {
 			log("Dealer has Blackjack and the round is over.");
-			// roundOver = true;
-			// if (!playerFirstHand.isBlackjack()) {
 			double winnings = playerFirstHand.getBet() * -1;
 			log("Player lost " + (winnings * -1) + " due to dealer blackjack.");
 			dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
 			dealerHandPanel.add(dealerHoleCardPanelFaceUp);
 			return winnings;
-			// }
 		}
 
 		Boolean dealerMustResolve = false;
-		// Phase 2: Player Round
-		// if (!roundOver) {
 		log("Running player's first hand.");
 		HandPanel playerFirstHandPanel = playerSeriesPanel.getFirstHandPanel();
 		dealerMustResolve = runHandAndCheckDealerResolve(playerFirstHand, playerFirstHandPanel,
 				dealerHand.getFirstCard());
-		// }
 
-		// Phase 3: Dealer Round
-		// if (!roundOver) {
 		dealerHandPanel.remove(dealerHoleCardPanelFaceDown);
 		dealerHandPanel.add(dealerHoleCardPanelFaceUp);
 
@@ -96,13 +85,8 @@ public class Round {
 			log("Running Dealer hand.");
 			runDealerRound(dealerHand, dealerHandPanel);
 		}
-		// }
 
-		// if (!roundOver) {
 		return calculateWinnings();
-		// } else {
-		// return 0.0;
-		// }
 	}
 
 	private Double calculateWinnings() {
@@ -196,7 +180,7 @@ public class Round {
 
 	private boolean splitAndCheckDealerResolve(Hand playerHand, HandPanel playerHandPanel, Card dealerUpCard)
 			throws InterruptedException {
-		blackjackPanel.disableBetAndDealAndEnableDecisions(false);
+		blackjackPanel.disableBetAndDealAndEnableDecisions(playerHand.getBet() * 2 <= playerBankroll, false);
 		playerSeries.removeHand(playerHand);
 		playerSeriesPanel.removeHandPanel(playerHandPanel);
 

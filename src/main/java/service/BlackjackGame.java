@@ -20,8 +20,8 @@ public class BlackjackGame extends JFrame {
 	private static final boolean INFO_ENABLED = true;
 	private static final boolean BUTTON_CONTROLLED = true;
 
-	private static final int DEAL_SPEED = 50;
-	private static final int DECKS_IN_SHOE = 2;
+	private static final int DEAL_SPEED = 1000;
+	private static final int DECKS_IN_SHOE = 6;
 	private static final int SHOE_CARD_LIMIT = 20;
 	private static final int PLAYER_BANKROLL_LIMIT = 10;
 	private static final int TOTAL_ROUNDS = 1;
@@ -49,7 +49,7 @@ public class BlackjackGame extends JFrame {
 			resetBlackjackPanel(false);
 			while (shoe.getNumberOfCardsInShoe() >= SHOE_CARD_LIMIT && playerBankroll >= PLAYER_BANKROLL_LIMIT) {
 				playerBet = 0.0;
-				blackjackPanel.setEnabledAllChipButtons(true);
+				blackjackPanel.enableChipButtons(playerBankroll);
 				waitForBetInput();
 				resetBlackjackPanel(true);
 				Double bankrollChange = playAndResolveNewRound();
@@ -69,10 +69,9 @@ public class BlackjackGame extends JFrame {
 		blackjackPanel.updatePlayerBetPanel(playerBet);
 		if (afterBet) {
 			blackjackPanel.disableBetButton();
-			blackjackPanel.setEnabledAllChipButtons(false);
-			blackjackPanel.enableDealButton();
+			blackjackPanel.disableChipButtons();
 		} else {
-			blackjackPanel.setEnabledAllChipButtons(true);
+			blackjackPanel.enableChipButtons(playerBankroll);
 		}
 		pack();
 	}
@@ -97,8 +96,6 @@ public class BlackjackGame extends JFrame {
 		blackjackPanel.addDealerHandPanel(dealerHandPanel);
 		blackjackPanel.addPlayerSeriesPanel(playerSeriesPanel);
 
-		waitForDealInput();
-
 		Card playerCard1 = shoe.drawCard();
 		// Card playerCard1 = new Card(8);
 		Card dealerUpCard = shoe.drawCard();
@@ -119,10 +116,12 @@ public class BlackjackGame extends JFrame {
 		playerCard2Panel.setCard(playerCard2);
 		dealDelay();
 
+		boolean canAffordToDouble = playerBet * 2 <= playerBankroll;
+
 		Round round = new Round(new Series(playerHand), new Hand(dealerUpCard, dealerHoleCard), playerSeriesPanel,
 				dealerHandPanel, new CardPanel(dealerHoleCard), dealerHoleCardPanel, blackjackPanel, this, shoe,
 				playerBankroll);
-		blackjackPanel.disableBetAndDealAndEnableDecisions(playerHand.isSplittable());
+		blackjackPanel.disableBetAndDealAndEnableDecisions(canAffordToDouble, playerHand.isSplittable());
 		return round.play();
 	}
 
@@ -145,6 +144,7 @@ public class BlackjackGame extends JFrame {
 				playerBet += blackjackPanel.getLatestIncrement().getValue();
 				blackjackPanel.resetLatestIncrement();
 				blackjackPanel.updatePlayerBankPanel(playerBankroll - playerBet);
+				blackjackPanel.enableChipButtons(playerBankroll - playerBet);
 				blackjackPanel.updatePlayerBetPanel(playerBet);
 				blackjackPanel.clearPlayerWinningsPanel();
 				blackjackPanel.clearHouseBankPanel();
@@ -152,13 +152,6 @@ public class BlackjackGame extends JFrame {
 			}
 		}
 		blackjackPanel.setBetButtonPressed(false);
-	}
-
-	public void waitForDealInput() throws InterruptedException {
-		while (!blackjackPanel.getDealButtonPressed()) {
-			Thread.sleep(1);
-		}
-		blackjackPanel.setDealButtonPressed(false);
 	}
 
 	public void waitForHandDecision() throws InterruptedException {

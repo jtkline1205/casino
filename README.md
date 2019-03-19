@@ -1,7 +1,7 @@
-## casino
+# casino
 A collection of games of skill and chance.
 
-# Blackjack
+## Blackjack
 Blackjack is a card game played in many casinos around the world. The player's goal in Blackjack is to "beat the dealer". To beat the dealer, the player must either:
 
 1. Achieve a higher hand total than the dealer does without going over 21.
@@ -17,5 +17,5 @@ Once the player has finished playing their hands, the dealer plays his hand.
 
 Once the dealer has played their hand, the round resolves and the player either wins, loses, or there is a push.
 
-# Preflop Holdem
+## Preflop Holdem
 Training app for raising preflop in Texas Hold'Em.

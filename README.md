@@ -2,6 +2,7 @@
 A collection of games of skill and chance.
 
 This project uses Java.
+The goal is to migrate this project to casino-games, which will be browser-based.
 
 ## Blackjack
 Blackjack is a card game played in many casinos around the world. The player's goal in Blackjack is to "beat the dealer". To beat the dealer, the player must either:

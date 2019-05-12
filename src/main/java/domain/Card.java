@@ -1,5 +1,6 @@
 package domain;
 
+//Card
 public class Card {
 
 	private Rank rank;
